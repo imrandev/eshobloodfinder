@@ -1,31 +1,27 @@
 package com.app.appathon.blooddonateapp.activities;
 
 import android.graphics.Color;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Toast;
 
 import com.app.appathon.blooddonateapp.R;
-import com.mikepenz.crossfader.Crossfader;
+import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.MiniDrawer;
-import com.mikepenz.materialdrawer.holder.BadgeStyle;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BackHandledFragment.BackHandlerInterface {
 
-    private MiniDrawer miniResult = null;
-    private Crossfader crossFader;
+    private BackHandledFragment selectedFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle Toolbar
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
         //set the back arrow in the toolbar
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -40,30 +37,112 @@ public class MainActivity extends AppCompatActivity {
         final Drawer result = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
+                .withSliderBackgroundColorRes(R.color.drawerColor)
                 .withTranslucentStatusBar(false)
                 .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_compact_header).withIcon(GoogleMaterial.Icon.gmd_sun).withIdentifier(1),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_action_bar_drawer).withIcon(FontAwesome.Icon.faw_home).withBadge("22").withBadgeStyle(new BadgeStyle(Color.RED, Color.RED)).withIdentifier(2).withSelectable(false),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_multi_drawer).withIcon(FontAwesome.Icon.faw_gamepad).withIdentifier(3),
-                        new PrimaryDrawerItem().withName(R.string.drawer_item_non_translucent_status_drawer).withIcon(FontAwesome.Icon.faw_eye).withIdentifier(4),
-                        new PrimaryDrawerItem().withDescription("A more complex sample").withName(R.string.drawer_item_advanced_drawer).withIcon(GoogleMaterial.Icon.gmd_adb).withIdentifier(5),
-                        new SectionDrawerItem().withName(R.string.drawer_item_section_header),
-                        new SecondaryDrawerItem().withName(R.string.drawer_item_open_source).withIcon(FontAwesome.Icon.faw_github),
-                        new SecondaryDrawerItem().withName(R.string.drawer_item_contact).withIcon(GoogleMaterial.Icon.gmd_format_color_fill).withTag("Bullhorn"),
-                        new DividerDrawerItem()
+                        new PrimaryDrawerItem().withName("Locating Donors")
+                                .withIcon(GoogleMaterial.Icon.gmd_google_maps)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withIdentifier(1),
+                        new PrimaryDrawerItem()
+                                .withName("Enquiry in Hospitals")
+                                .withIcon(FontAwesome.Icon.faw_home)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withIdentifier(2),
+                        new PrimaryDrawerItem()
+                                .withName(R.string.drawer_item_multi_drawer)
+                                .withIcon(FontAwesome.Icon.faw_gamepad)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withIdentifier(3),
+                        new PrimaryDrawerItem()
+                                .withName("Favorites")
+                                .withIcon(FontAwesome.Icon.faw_heart)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withIdentifier(4),
+                        new SectionDrawerItem()
+                                .withName("SOCIAL")
+                                .withTextColor(Color.WHITE),
+                        new SecondaryDrawerItem()
+                                .withName("Facebook")
+                                .withIcon(FontAwesome.Icon.faw_facebook)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor)),
+                        new SecondaryDrawerItem()
+                                .withName(R.string.drawer_item_contact)
+                                .withIcon(GoogleMaterial.Icon.gmd_format_color_fill)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withTag("Bullhorn"),
+                        new SecondaryDrawerItem()
+                                .withName("Messaging")
+                                .withIcon(GoogleMaterial.Icon.gmd_email)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withTag("Bullhorn"),
+                        new SectionDrawerItem().withName("Account")
+                                .withTextColor(Color.WHITE),
+                        new SecondaryDrawerItem()
+                                .withName("Sign in")
+                                .withIcon(GoogleMaterial.Icon.gmd_sign_in)
+                                .withIconColor(Color.WHITE)
+                                .withTextColor(Color.WHITE)
+                                .withSelectedTextColor(Color.WHITE)
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withTag("Bullhorn")
                 ) // add the items we want to use with our Drawer
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
 
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem instanceof Nameable) {
-                            Toast.makeText(MainActivity.this, ((Nameable) drawerItem).getName().getText(MainActivity.this), Toast.LENGTH_SHORT).show();
+                        if (drawerItem != null) {
+                            Fragment fragment = null;
+                            if (drawerItem.getIdentifier() == 1) {
+                                fragment = new LocatingDonors();
+                                FragmentManager fragmentManager = getSupportFragmentManager();
+                                fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+                                toolbar.setSubtitle("Locating Donors");
+                            } else if (drawerItem.getIdentifier() == 2) {
+                            } else if (drawerItem.getIdentifier() == 3) {
+                            }
                         }
                         return false;
                     }
                 })
                 .withSavedInstance(savedInstanceState)
+                .withSelectedItem(1)
                 // build only the view of the Drawer (don't inflate it automatically in our layout which is done with .build())
                 .build();
+        result.setSelection(1, true);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(selectedFragment == null || !selectedFragment.onBackPressed()) {
+            // Selected fragment did not consume the back press event.
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void setSelectedFragment(BackHandledFragment selectedFragment) {
+        this.selectedFragment = selectedFragment;
     }
 }

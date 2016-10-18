@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_all"
+        android:title="All"
+        app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/action_ap"
+        android:title="A+"
+        app:showAsAction="always|withText" />
+    <item
+        android:id="@+id/action_an"
+        android:title="A-"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_bp"
+        android:title="B+"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_bn"
+        android:title="B-"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_abp"
+        android:title="AB+"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_abn"
+        android:title="AB-"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_op"
+        android:title="O+"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_on"
+        android:title="O-"
+        app:showAsAction="ifRoom|withText" />
+</menu>
