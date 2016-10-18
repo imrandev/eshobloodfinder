@@ -1,5 +1,6 @@
 package com.app.appathon.blooddonateapp.activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -65,16 +66,19 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                                 .withSelectedColor(getResources().getColor(R.color.selectedColor))
                                 .withIdentifier(2),
                         new PrimaryDrawerItem()
-                                .withName(R.string.drawer_item_multi_drawer)
-                                .withIcon(FontAwesome.Icon.faw_gamepad)
+                                .withName("Favorites")
+                                .withIcon(FontAwesome.Icon.faw_heart)
                                 .withIconColor(Color.WHITE)
                                 .withTextColor(Color.WHITE)
                                 .withSelectedTextColor(Color.WHITE)
                                 .withSelectedColor(getResources().getColor(R.color.selectedColor))
                                 .withIdentifier(3),
-                        new PrimaryDrawerItem()
-                                .withName("Favorites")
-                                .withIcon(FontAwesome.Icon.faw_heart)
+                        new SectionDrawerItem()
+                                .withName("More...")
+                                .withTextColor(Color.WHITE),
+                        new SecondaryDrawerItem()
+                                .withName("Settings")
+                                .withIcon(GoogleMaterial.Icon.gmd_settings)
                                 .withIconColor(Color.WHITE)
                                 .withTextColor(Color.WHITE)
                                 .withSelectedTextColor(Color.WHITE)
@@ -89,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                                 .withIconColor(Color.WHITE)
                                 .withTextColor(Color.WHITE)
                                 .withSelectedTextColor(Color.WHITE)
-                                .withSelectedColor(getResources().getColor(R.color.selectedColor)),
+                                .withSelectedColor(getResources().getColor(R.color.selectedColor))
+                                .withIdentifier(5),
                         new SecondaryDrawerItem()
                                 .withName(R.string.drawer_item_contact)
                                 .withIcon(GoogleMaterial.Icon.gmd_format_color_fill)
@@ -109,13 +114,13 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                         new SectionDrawerItem().withName("Account")
                                 .withTextColor(Color.WHITE),
                         new SecondaryDrawerItem()
-                                .withName("Sign in")
+                                .withName("Sign up")
                                 .withIcon(GoogleMaterial.Icon.gmd_sign_in)
                                 .withIconColor(Color.WHITE)
                                 .withTextColor(Color.WHITE)
                                 .withSelectedTextColor(Color.WHITE)
                                 .withSelectedColor(getResources().getColor(R.color.selectedColor))
-                                .withTag("Bullhorn")
+                                .withIdentifier(7)
                 ) // add the items we want to use with our Drawer
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
 
@@ -128,7 +133,8 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                                 FragmentManager fragmentManager = getSupportFragmentManager();
                                 fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
                                 toolbar.setSubtitle("Locating Donors");
-                            } else if (drawerItem.getIdentifier() == 2) {
+                            } else if (drawerItem.getIdentifier() == 7) {
+                                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
                             } else if (drawerItem.getIdentifier() == 3) {
                             }
                         }
