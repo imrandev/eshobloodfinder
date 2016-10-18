@@ -3,13 +3,19 @@ package com.app.appathon.blooddonateapp.activities;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
+import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.materialdrawer.Drawer;
@@ -22,6 +28,9 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 public class MainActivity extends AppCompatActivity implements BackHandledFragment.BackHandlerInterface {
 
     private BackHandledFragment selectedFragment;
+    private static final String[] LOCATION = {
+            "Dhaka", "Chittagong", "Rajshahi", "Barisal", "Comilla", "Sylhet", "Khulna"
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,5 +153,16 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
     @Override
     public void setSelectedFragment(BackHandledFragment selectedFragment) {
         this.selectedFragment = selectedFragment;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actionbar_menu, menu);
+
+        MenuItem item = menu.findItem(R.id.spinner);
+        MaterialSpinner spinner = (MaterialSpinner) MenuItemCompat.getActionView(item);
+        spinner.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        spinner.setItems(LOCATION);
+        return true;
     }
 }

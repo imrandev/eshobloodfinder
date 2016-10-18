@@ -47,11 +47,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!--Popup Strings-->
-    <string name="menu_all">All</string>
-    <string name="menu_ap">A+</string>
-    <string name="menu_an">A-</string>
-    <string name="menu_bp">B+</string>
-    <string name="menu_bn">B-</string>
-    <string name="menu_abp">AB+</string>
-    <string name="menu_abn">AB-</string>
+    <string name="menu_all">Dhaka</string>
+    <string name="menu_ap">Chittagong</string>
+    <string name="menu_an">Sylhet</string>
+    <string name="menu_bp">Barisal</string>
+    <string name="menu_bn">Comilla</string>
+    <string name="menu_abp">Rajshahi</string>
+    <string name="menu_abn">Khulna</string>
 </resources>
