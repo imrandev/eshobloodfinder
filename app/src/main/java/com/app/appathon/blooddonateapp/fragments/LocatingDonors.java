@@ -1,7 +1,5 @@
 package com.app.appathon.blooddonateapp.fragments;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -9,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.TabsAdapter;
 import com.app.appathon.blooddonateapp.model.TabsItem;
@@ -25,7 +24,7 @@ import it.neokree.materialtabs.MaterialTabListener;
  * Use the {@link LocatingDonors#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class LocatingDonors extends Fragment implements MaterialTabListener {
+public class LocatingDonors extends Fragment implements MaterialTabListener,OnBackPressedListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -46,8 +45,8 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
     }
 
     private void createTabsItem() {
-        mTabs.add(new TabsItem("Available", new AvailableDonorsFragment()));
-        mTabs.add(new TabsItem("All", new AllDonorsFragment()));
+        mTabs.add(new TabsItem("Available", new AvailableDonors()));
+        mTabs.add(new TabsItem("All", new AllDonors()));
     }
 
     /**
@@ -83,6 +82,8 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_locating_donors, container, false);
         viewPager = (ViewPager) rootView.findViewById(R.id.viewPager);
+        //Adding TabHost
+        tabHost = (MaterialTabHost) rootView.findViewById(R.id.materialTabHost);
 
          //Set an Adapter for the View Pager
         tAdapter = new TabsAdapter(getChildFragmentManager(),mTabs);
@@ -96,8 +97,6 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
             }
         });
 
-        //Adding TabHost
-        tabHost = (MaterialTabHost) rootView.findViewById(R.id.materialTabHost);
         // insert all tabs from pagerAdapter data
         for (int i = 0; i < tAdapter.getCount(); i++) {
             tabHost.addTab(
@@ -122,5 +121,18 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
     @Override
     public void onTabUnselected(MaterialTab tab) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        List<Fragment> fragmentList = getFragmentManager().getFragments();
+        if (fragmentList != null) {
+            //TODO: Perform your logic to pass back press here
+            for(Fragment fragment : fragmentList){
+                if(fragment instanceof OnBackPressedListener){
+                    ((OnBackPressedListener)fragment).onBackPressed();
+                }
+            }
+        }
     }
 }

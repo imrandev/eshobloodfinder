@@ -3,7 +3,7 @@ package com.app.appathon.blooddonateapp.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,10 +11,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
+import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
+import com.app.appathon.blooddonateapp.fragments.EnquiryHospitals;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -26,9 +26,11 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
-public class MainActivity extends AppCompatActivity implements BackHandledFragment.BackHandlerInterface {
+import java.util.List;
 
-    private BackHandledFragment selectedFragment;
+public class MainActivity extends AppCompatActivity{
+
+    private FragmentTransaction fragmentTransaction;
     private static final String[] LOCATION = {
             "Dhaka", "Chittagong", "Rajshahi", "Barisal", "Comilla", "Sylhet", "Khulna"
     };
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                                 .withIdentifier(1),
                         new PrimaryDrawerItem()
                                 .withName("Enquiry in Hospitals")
-                                .withIcon(FontAwesome.Icon.faw_home)
+                                .withIcon(FontAwesome.Icon.faw_hospital_o)
                                 .withIconColor(Color.WHITE)
                                 .withTextColor(Color.WHITE)
                                 .withSelectedTextColor(Color.WHITE)
@@ -130,12 +132,22 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                             Fragment fragment = null;
                             if (drawerItem.getIdentifier() == 1) {
                                 fragment = new LocatingDonors();
-                                FragmentManager fragmentManager = getSupportFragmentManager();
-                                fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+                                //FragmentManager fragmentManager = getSupportFragmentManager();
+                                //fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+                                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left,R.anim.exit_to_right);
+                                fragmentTransaction.replace(R.id.fragment_container,fragment).commit();
                                 toolbar.setSubtitle("Locating Donors");
                             } else if (drawerItem.getIdentifier() == 7) {
                                 startActivity(new Intent(MainActivity.this,SignUpActivity.class));
-                            } else if (drawerItem.getIdentifier() == 3) {
+                                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
+                                finish();
+                            } else if (drawerItem.getIdentifier() == 2) {
+                                fragment = new EnquiryHospitals();
+                                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left,R.anim.exit_to_right);
+                                fragmentTransaction.replace(R.id.fragment_container,fragment).commit();
+                                toolbar.setSubtitle("Enquiry in Hospitals");
                             }
                         }
                         return false;
@@ -146,19 +158,6 @@ public class MainActivity extends AppCompatActivity implements BackHandledFragme
                 // build only the view of the Drawer (don't inflate it automatically in our layout which is done with .build())
                 .build();
         result.setSelection(1, true);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(selectedFragment == null || !selectedFragment.onBackPressed()) {
-            // Selected fragment did not consume the back press event.
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void setSelectedFragment(BackHandledFragment selectedFragment) {
-        this.selectedFragment = selectedFragment;
     }
 
     @Override

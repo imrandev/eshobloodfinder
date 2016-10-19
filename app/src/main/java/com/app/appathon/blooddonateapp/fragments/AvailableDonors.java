@@ -1,32 +1,27 @@
 package com.app.appathon.blooddonateapp.fragments;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatCallback;
-import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
 import com.jaredrummler.materialspinner.MaterialSpinner;
-import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+
+import java.util.List;
 
 import br.com.mauker.materialsearchview.MaterialSearchView;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link AvailableDonorsFragment#newInstance} factory method to
+ * Use the {@link AvailableDonors#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AvailableDonorsFragment extends Fragment {
+public class AvailableDonors extends Fragment implements OnBackPressedListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -36,11 +31,11 @@ public class AvailableDonorsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
     private FloatingActionButton mFabButton;
-    private static final String[] ANDROID_VERSIONS = {
+    private static final String[] BLOOD_TYPE = {
             "All", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
     };
 
-    public AvailableDonorsFragment() {
+    public AvailableDonors() {
         // Required empty public constructor
     }
 
@@ -50,11 +45,11 @@ public class AvailableDonorsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment AvailableDonorsFragment.
+     * @return A new instance of fragment AvailableDonors.
      */
     // TODO: Rename and change types and number of parameters
-    public static AvailableDonorsFragment newInstance(String param1, String param2) {
-        AvailableDonorsFragment fragment = new AvailableDonorsFragment();
+    public static AvailableDonors newInstance(String param1, String param2) {
+        AvailableDonors fragment = new AvailableDonors();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -87,7 +82,8 @@ public class AvailableDonorsFragment extends Fragment {
         mFabButton.show();
 
         MaterialSpinner spinner = (MaterialSpinner) rootView.findViewById(R.id.mSpinner);
-        spinner.setItems(ANDROID_VERSIONS);
+        spinner.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        spinner.setItems(BLOOD_TYPE);
         spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
@@ -127,5 +123,18 @@ public class AvailableDonorsFragment extends Fragment {
             }
         });
         return rootView;
+    }
+
+    @Override
+    public void onBackPressed() {
+        List<Fragment> fragmentList = getFragmentManager().getFragments();
+        if (fragmentList != null) {
+            //TODO: Perform your logic to pass back press here
+            for(Fragment fragment : fragmentList){
+                if(fragment instanceof OnBackPressedListener){
+                    ((OnBackPressedListener)fragment).onBackPressed();
+                }
+            }
+        }
     }
 }

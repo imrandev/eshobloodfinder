@@ -1,20 +1,22 @@
 package com.app.appathon.blooddonateapp.fragments;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link AllDonorsFragment#newInstance} factory method to
+ * Use the {@link EnquiryHospitals#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AllDonorsFragment extends Fragment {
+public class EnquiryHospitals extends Fragment implements OnBackPressedListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -24,8 +26,7 @@ public class AllDonorsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-
-    public AllDonorsFragment() {
+    public EnquiryHospitals() {
         // Required empty public constructor
     }
 
@@ -35,11 +36,11 @@ public class AllDonorsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment AllDonorsFragment.
+     * @return A new instance of fragment EnquiryHospitals.
      */
     // TODO: Rename and change types and number of parameters
-    public static AllDonorsFragment newInstance(String param1, String param2) {
-        AllDonorsFragment fragment = new AllDonorsFragment();
+    public static EnquiryHospitals newInstance(String param1, String param2) {
+        EnquiryHospitals fragment = new EnquiryHospitals();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -60,8 +61,19 @@ public class AllDonorsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_all_donors, container, false);
-        return rootView;
+        return inflater.inflate(R.layout.fragment_enquiry_hospitals, container, false);
     }
 
+    @Override
+    public void onBackPressed() {
+        List<Fragment> fragmentList = getFragmentManager().getFragments();
+        if (fragmentList != null) {
+            //TODO: Perform your logic to pass back press here
+            for(Fragment fragment : fragmentList){
+                if(fragment instanceof OnBackPressedListener){
+                    ((OnBackPressedListener)fragment).onBackPressed();
+                }
+            }
+        }
+    }
 }
