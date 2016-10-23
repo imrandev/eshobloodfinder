@@ -1,14 +1,19 @@
 package com.app.appathon.blooddonateapp.fragments;
 
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
+import com.app.appathon.blooddonateapp.adapter.CustomListAdapter;
+import com.app.appathon.blooddonateapp.adapter.DBAdapter;
 
 import java.util.List;
 
@@ -26,6 +31,8 @@ public class AllDonors extends Fragment implements OnBackPressedListener{
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private DBAdapter dbHelper;
+    private Cursor cursor;
 
 
     public AllDonors() {
@@ -59,11 +66,29 @@ public class AllDonors extends Fragment implements OnBackPressedListener{
         }
     }
 
+    private RecyclerView recyclerView;
+    private CustomListAdapter customListAdapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_all_donors, container, false);
+        dbHelper = new DBAdapter(getContext());
+        dbHelper.open();
+
+        cursor = dbHelper.fetchAllInfo();
+
+        dbHelper.close();
+
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.allDonor);
+        recyclerView.setHasFixedSize(true);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.setAdapter(new CustomListAdapter(getContext(),cursor));
+
         return rootView;
     }
 

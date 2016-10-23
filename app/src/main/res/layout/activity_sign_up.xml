@@ -93,11 +93,11 @@
                         android:layout_marginTop="8dp">
 
                         <EditText
-                            android:id="@+id/input_password"
+                            android:id="@+id/input_blood"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Password"
-                            android:inputType="textPassword" />
+                            android:hint="Blood Type"
+                            android:inputType="text" />
                     </android.support.design.widget.TextInputLayout>
 
                     <!-- Phone Number Label -->
@@ -115,21 +115,28 @@
                             android:inputType="phone" />
                     </android.support.design.widget.TextInputLayout>
 
-                    <!-- Blood Type -->
-                    <android.support.design.widget.TextInputLayout
+                    <!-- Last Donate Type -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginTop="8dp">
+                        android:layout_margin="5dp"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
 
-                        <EditText
-                            android:id="@+id/input_blood"
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:hint="Blood Type"
-                            android:inputType="text" />
-                    </android.support.design.widget.TextInputLayout>
+                            android:layout_weight="1.5"
+                            android:text="Last Donated:"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
+                        <com.jaredrummler.materialspinner.MaterialSpinner
+                            android:id="@+id/donateDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight=".5" />
+
+                    </LinearLayout>
                     <!-- Area -->
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
