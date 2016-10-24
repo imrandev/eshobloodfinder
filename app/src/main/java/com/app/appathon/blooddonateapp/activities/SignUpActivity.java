@@ -13,6 +13,8 @@ import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.DBAdapter;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
+import java.util.Calendar;
+
 public class SignUpActivity extends AppCompatActivity {
 
     private DBAdapter dbHelper;
@@ -22,7 +24,8 @@ public class SignUpActivity extends AppCompatActivity {
     Button signUp;
     private MaterialSpinner materialSpinner;
 
-    String[] monthArray = {"1","2","3","4","5","6","7","8","9","10","11","12"};
+    String[] monthArray = {"Never","1","2","3","4","5","6","7","8","9","10","11","12"};
+    String dDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,8 @@ public class SignUpActivity extends AppCompatActivity {
         materialSpinner = (MaterialSpinner) findViewById(R.id.donateDate);
         materialSpinner.setItems(monthArray);
 
+
+
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +56,12 @@ public class SignUpActivity extends AppCompatActivity {
                 String bldGrp = bldGrpET.getText().toString();
                 String area = areaET.getText().toString();
                 String dist = districtET.getText().toString();
-                String dDate = materialSpinner.getText().toString();
+                if(materialSpinner.getText().equals("Never")){
+                    dDate = "0";
+                }
+                else {
+                    dDate = materialSpinner.getText().toString();
+                }
 
                 dbHelper.open();
                 dbHelper.insertInfo(name, email, bldGrp, number, dist, area, dDate);

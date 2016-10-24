@@ -2,27 +2,34 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card"
+    android:layout_margin="3dp"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     app:cardCornerRadius="3dp"
-    app:cardElevation="5dp"
-    app:cardUseCompatPadding="true">
+    app:cardElevation="3dp">
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="1">
 
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+        <RelativeLayout
+            android:gravity="center"
             android:layout_weight="0.1"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/account" />
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/account" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -72,13 +79,22 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+        <RelativeLayout
+            android:gravity="center"
             android:layout_weight=".1"
-            android:scaleType="fitCenter"
-            app:srcCompat="@android:drawable/ic_menu_call" />
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:background="@drawable/rounded_spinner"
+                android:id="@+id/imageView2"
+                android:layout_gravity="center"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/phone" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

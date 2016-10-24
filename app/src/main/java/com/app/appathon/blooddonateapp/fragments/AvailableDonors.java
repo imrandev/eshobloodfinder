@@ -2,6 +2,7 @@ package com.app.appathon.blooddonateapp.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -11,7 +12,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -26,6 +29,9 @@ import android.widget.Toast;
 import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.MainActivity;
+import com.app.appathon.blooddonateapp.adapter.AvailableAdapter;
+import com.app.appathon.blooddonateapp.adapter.CustomListAdapter;
+import com.app.appathon.blooddonateapp.adapter.DBAdapter;
 import com.app.appathon.blooddonateapp.utils.GeocoderHandler;
 import com.app.appathon.blooddonateapp.utils.LocationAddress;
 import com.jaredrummler.materialspinner.MaterialSpinner;
@@ -61,6 +67,10 @@ public class AvailableDonors extends Fragment implements OnBackPressedListener{
     private Boolean isFabOpen = false;
     private MaterialSearchView searchView;
     private PopupMenu popup;
+
+    private DBAdapter dbHelper;
+    private Cursor cursor;
+    private RecyclerView recyclerView;
 
     public AvailableDonors() {
         // Required empty public constructor
@@ -113,6 +123,21 @@ public class AvailableDonors extends Fragment implements OnBackPressedListener{
         mSearchFab.setOnClickListener(onFabButtonListener);
         mListFab.setOnClickListener(onFabButtonListener);
         mGPSFab.setOnClickListener(onFabButtonListener);
+
+        dbHelper = new DBAdapter(getContext());
+        dbHelper.open();
+
+        cursor = dbHelper.fetchAllInfo();
+
+        dbHelper.close();
+
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.availableDonor);
+        recyclerView.setHasFixedSize(true);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.setAdapter(new AvailableAdapter(getContext(),cursor));
 
 
 

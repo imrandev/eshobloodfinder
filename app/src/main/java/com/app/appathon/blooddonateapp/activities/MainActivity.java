@@ -1,22 +1,17 @@
 package com.app.appathon.blooddonateapp.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
-import android.os.Message;
 import android.os.ResultReceiver;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -28,14 +23,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.fragments.EnquiryHospitals;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.app.appathon.blooddonateapp.services.FetchAddressIntentService;
 import com.app.appathon.blooddonateapp.utils.Constants;
-import com.app.appathon.blooddonateapp.utils.GeocoderHandler;
-import com.app.appathon.blooddonateapp.utils.LocationAddress;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -58,8 +50,6 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
@@ -134,12 +124,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
-    protected LocationRequest locationRequest;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     protected Boolean mRequestingLocationUpdates;
-
-    private AddressResultReceiver addressResultReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,17 +228,17 @@ public class MainActivity extends AppCompatActivity implements
                                 //FragmentManager fragmentManager = getSupportFragmentManager();
                                 //fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
                                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left,R.anim.exit_to_right);
-                                fragmentTransaction.replace(R.id.fragment_container,fragment).commit();
+                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
                                 toolbar.setSubtitle("Locating Donors");
                             } else if (drawerItem.getIdentifier() == 7) {
-                                startActivity(new Intent(MainActivity.this,SignUpActivity.class));
-                                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
+                                startActivity(new Intent(MainActivity.this, SignUpActivity.class));
+                                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                             } else if (drawerItem.getIdentifier() == 2) {
                                 fragment = new EnquiryHospitals();
                                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left,R.anim.exit_to_right);
-                                fragmentTransaction.replace(R.id.fragment_container,fragment).commit();
+                                fragmentTransaction.setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right);
+                                fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
                                 toolbar.setSubtitle("Enquiry in Hospitals");
                             }
                         }
@@ -272,9 +258,7 @@ public class MainActivity extends AppCompatActivity implements
         buildLocationSettingsRequest();
         checkLocationSettings();
 
-        startIntentService();
-
-        updateUIWidgets();
+        fetchAddressButtonHandler();
     }
 
     @Override
@@ -321,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements
      * Runs when user clicks the Fetch Address button. Starts the service to fetch the address if
      * GoogleApiClient is connected.
      */
-    public void fetchAddressButtonHandler(View view) {
+    public void fetchAddressButtonHandler() {
         // We only start the service to fetch the address if GoogleApiClient is connected.
         if (mGoogleApiClient.isConnected() && mLastLocation != null) {
             startIntentService();
@@ -546,14 +530,15 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         /**
-         *  Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
+         * Receives data sent from FetchAddressIntentService and updates the UI in MainActivity.
          */
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
             // Display the address string or an error message sent from the intent service.
             mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
-            displayAddressOutput();
+            LOCATION_LIST.add(mAddressOutput);
+            spinner.setItems(LOCATION_LIST);
 
             // Show a toast message if an address was found.
             if (resultCode == Constants.SUCCESS_RESULT) {

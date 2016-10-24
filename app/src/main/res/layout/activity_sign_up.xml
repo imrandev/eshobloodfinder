@@ -47,12 +47,14 @@
 
             <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:paddingBottom="10dp"
                     android:paddingLeft="24dp"
                     android:paddingRight="24dp">
                     <!--  Name Label -->
@@ -97,7 +99,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Blood Type"
-                            android:inputType="text" />
+                            android:inputType="textCapWords" />
                     </android.support.design.widget.TextInputLayout>
 
                     <!-- Phone Number Label -->
@@ -149,7 +151,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Area"
-                            android:inputType="text" />
+                            android:inputType="textCapWords" />
                     </android.support.design.widget.TextInputLayout>
 
                     <!-- District -->
@@ -164,7 +166,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="District"
-                            android:inputType="text" />
+                            android:inputType="textCapWords" />
                     </android.support.design.widget.TextInputLayout>
                 </LinearLayout>
             </ScrollView>

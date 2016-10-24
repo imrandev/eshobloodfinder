@@ -2,6 +2,9 @@ package com.app.appathon.blooddonateapp.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import java.util.Calendar;
+import android.icu.util.GregorianCalendar;
+import android.icu.util.TimeZone;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,23 +16,24 @@ import android.widget.TextView;
 import com.app.appathon.blooddonateapp.OnItemClickListener;
 import com.app.appathon.blooddonateapp.R;
 
-import java.util.Calendar;
 
 /**
  * Created by Sunny on 10/22/2016.
  */
 
-public class CustomListAdapter extends RecyclerView.Adapter<CustomListAdapter.ListHolder> {
+public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.ListHolder> {
 
     private Cursor arrayColumns;
     private Context mContext;
     private OnItemClickListener onItemClickListener;
+    private Calendar calendar;
     int lastDonated;
 
-    public CustomListAdapter(Context context, Cursor arrayColumns){
+    public AvailableAdapter(Context context, Cursor arrayColumns){
         this.arrayColumns= arrayColumns;
         this.mContext = context;
     }
+
     @Override
     public ListHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item,parent,false);
@@ -43,21 +47,34 @@ public class CustomListAdapter extends RecyclerView.Adapter<CustomListAdapter.Li
         Calendar c = Calendar.getInstance();
         int curMonth = c.get(Calendar.MONTH)+1;
         int donateDATE = Integer.parseInt(arrayColumns.getString(7));
+
         if(donateDATE==0){
+            holder.tName.setText(arrayColumns.getString(1));
+            holder.tEmail.setText(arrayColumns.getString(2));
+            holder.tBloodGroup.setText("Blood Type: "+ arrayColumns.getString(3));
+            holder.tArea.setText(arrayColumns.getString(6)+","+arrayColumns.getString(5));
             holder.tDonateDate.setText("Last Donated: "+"Never");
         }
         else if(curMonth>donateDATE){
             int interValTime = curMonth - donateDATE;
             lastDonated = curMonth - interValTime;
-            holder.tDonateDate.setText("Last Donated "+lastDonated+" month(s) ago");
+            if(lastDonated >= 3){
+                holder.tName.setText(arrayColumns.getString(1));
+                holder.tEmail.setText(arrayColumns.getString(2));
+                holder.tBloodGroup.setText("Blood Type: "+ arrayColumns.getString(3));
+                holder.tArea.setText(arrayColumns.getString(6)+","+arrayColumns.getString(5));
+                holder.tDonateDate.setText("Last Donated "+lastDonated+" month(s) ago");
+            }
         } else if(donateDATE>curMonth){
             int interValTime = (donateDATE + curMonth + 2) - donateDATE;
-            holder.tDonateDate.setText("Last Donated "+interValTime+" month(s) ago");
+            if(interValTime >= 3){
+                holder.tName.setText(arrayColumns.getString(1));
+                holder.tEmail.setText(arrayColumns.getString(2));
+                holder.tBloodGroup.setText("Blood Type: "+ arrayColumns.getString(3));
+                holder.tArea.setText(arrayColumns.getString(6)+","+arrayColumns.getString(5));
+                holder.tDonateDate.setText("Last Donated "+interValTime+" month(s) ago");
+            }
         }
-        holder.tName.setText(arrayColumns.getString(1));
-        holder.tEmail.setText(arrayColumns.getString(2));
-        holder.tBloodGroup.setText("Blood Type: "+ arrayColumns.getString(3));
-        holder.tArea.setText(arrayColumns.getString(6)+","+arrayColumns.getString(5));
         holder.proImage.setImageResource(R.drawable.account);
 
         holder.tCallButton.setOnClickListener(new View.OnClickListener() {
