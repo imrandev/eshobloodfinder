@@ -31,8 +31,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.MainActivity;
+import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
 import com.app.appathon.blooddonateapp.adapter.AvailableAdapter;
 import com.app.appathon.blooddonateapp.app.BloodApplication;
 import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
@@ -372,18 +375,30 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
         @Override
         public void onCall(View v, int position) {
             phone = userArrayList.get(position).getPhone();
-            try {
-                Intent phoneIntent = new Intent(Intent.ACTION_CALL);
-                phoneIntent.setData(Uri.parse("tel:" + phone));
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-                } else {
-                    startActivity(phoneIntent);
-                }
-            } catch (android.content.ActivityNotFoundException | SecurityException ex) {
-                Toast.makeText(getContext(),
-                        "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
-            }
+            new MaterialDialog.Builder(getContext())
+                    .title(phone)
+                    .icon(ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_round))
+                    .positiveText("Call")
+                    .backgroundColorRes(R.color.dialog_color)
+                    .titleColorRes(android.R.color.white)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            try {
+                                Intent phoneIntent = new Intent(Intent.ACTION_CALL);
+                                phoneIntent.setData(Uri.parse("tel:" + phone));
+                                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                    requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
+                                } else {
+                                    startActivity(phoneIntent);
+                                }
+                            } catch (android.content.ActivityNotFoundException | SecurityException ex) {
+                                Toast.makeText(getContext(),
+                                        "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    })
+                    .show();
         }
     };
 

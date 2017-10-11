@@ -21,6 +21,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
+import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
 import com.app.appathon.blooddonateapp.model.Inbox;
 
 import java.util.ArrayList;
@@ -31,18 +32,22 @@ import java.util.ArrayList;
 
 public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> {
 
-    private static final int REQUEST_PHONE_CALL = 1;
     private ArrayList<Inbox> inboxArrayList;
     private Activity activity;
+    private ActionCallToUser callToUser;
     public InboxAdapter(ArrayList<Inbox> inboxArrayList, Activity activity) {
         this.inboxArrayList = inboxArrayList;
         this.activity = activity;
     }
 
+    public void setCallToUser(ActionCallToUser callToUser){
+        this.callToUser = callToUser;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_inbox, parent, false);
-        return new ViewHolder(rootView);
+        return new ViewHolder(rootView,callToUser);
     }
 
     @Override
@@ -63,7 +68,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.op1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    showDialogWindow(phone);
+                callToUser.onCall(v, holder.getAdapterPosition());
             }
         });
 
@@ -78,39 +83,13 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         });
     }
 
-    private void showDialogWindow(final String phone) {
-        new MaterialDialog.Builder(activity)
-                .title(phone)
-                .icon(ContextCompat.getDrawable(activity, R.drawable.ic_phone_round))
-                .positiveText("Call")
-                .backgroundColorRes(R.color.dialog_color)
-                .titleColorRes(android.R.color.white)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        try {
-                            Intent phoneIntent = new Intent(Intent.ACTION_CALL);
-                            phoneIntent.setData(Uri.parse("tel:" + phone));
-                            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-                            } else {
-                                activity.startActivity(phoneIntent);
-                            }
-                        } catch (android.content.ActivityNotFoundException | SecurityException ex) {
-                            Toast.makeText(activity,
-                                    "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                })
-                .show();
-    }
 
     @Override
     public int getItemCount() {
         return inboxArrayList.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView msg_body;
         private TextView sender_name;
@@ -120,10 +99,11 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         private CardView cardView;
         private TextView op1;
         private TextView op2;
+        private ActionCallToUser callToUser;
 
-        ViewHolder(View itemView) {
+        ViewHolder(View itemView, ActionCallToUser callToUser) {
             super(itemView);
-
+            this.callToUser = callToUser;
             msg_body = (TextView) itemView.findViewById(R.id.msg_body);
             sender_name = (TextView) itemView.findViewById(R.id.sender_name);
             msg_thumb = (TextView) itemView.findViewById(R.id.msg_thumb);
@@ -132,6 +112,11 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
             op1 = (TextView) itemView.findViewById(R.id.op1);
             op2 = (TextView) itemView.findViewById(R.id.op2);
             cardView = (CardView) itemView.findViewById(R.id.inbox_card);
+        }
+
+        @Override
+        public void onClick(View v) {
+            callToUser.onCall(v, getAdapterPosition());
         }
     }
 }
