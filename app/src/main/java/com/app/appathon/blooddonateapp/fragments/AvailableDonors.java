@@ -65,6 +65,7 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
     private String phone;
 
     private static final int REQUEST_PHONE_CALL = 1;
+    private FirebaseDatabaseHelper databaseHelper;
 
     public AvailableDonors() {
         // Required empty public constructor
@@ -102,7 +103,7 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
 
-        FirebaseDatabaseHelper databaseHelper = new FirebaseDatabaseHelper(getActivity(), this);
+        databaseHelper = new FirebaseDatabaseHelper(getActivity(), this);
         databaseHelper.getAvailableUserListData();
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -309,6 +310,7 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
             adapter = new AvailableAdapter(getActivity(),arrayList);
             recyclerView.setAdapter(adapter);
         } else {
+            databaseHelper.getAvailableUserListData();
             adapter.refreshList(userArrayList);
             recyclerView.setAdapter(adapter);
         }

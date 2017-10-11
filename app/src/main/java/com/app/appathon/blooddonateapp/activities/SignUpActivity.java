@@ -55,18 +55,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     private MaterialSpinner materialSpinner, genderSpinner;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    private PhoneAuthProvider.ForceResendingToken mResendToken;
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
-    String mVerificationId;
 
     private ArrayList<Integer> month = new ArrayList<>();
     private ArrayList<String> gender = new ArrayList<>();
-    private LatLng latLng;
-    private EditText verifyCode,verifyPhone;
-    private ImageButton sendCode;
     private String username;
-    private MaterialDialog dialog;
-    private static final String TAG = "SignUpActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,8 +159,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         String bldGrp = bldGrpET.getText().toString();
         String area = areaET.getText().toString();
 
-        latLng = getLocationFromAddress(area);
-
         int dDate = materialSpinner.getSelectedIndex();
         String gender = genderSpinner.getItems().get(genderSpinner.getSelectedIndex()).toString();
 
@@ -228,31 +218,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         return result;
     }
 
-    public LatLng getLocationFromAddress(String strAddress) {
-
-        Geocoder coder = new Geocoder(this);
-        List<Address> address;
-        LatLng latLng = null;
-
-        try {
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
-            }
-            Address location = address.get(0);
-            double lat = location.getLatitude();
-            double lng = location.getLongitude();
-
-            latLng = new LatLng(lat, lng);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return latLng;
-    }
-
     private void writeNewUser(String userId, String uname, String name, String email, String gender, String phone, String address, String blood, int date) {
         User user = new User(userId, uname, name, email, phone,
-                address, blood, date, gender, latLng.latitude, latLng.longitude,"");
+                address, blood, date, gender, 0, 0,"");
         mDatabase.child("users").child(userId).setValue(user);
         Toast.makeText(SignUpActivity.this, "Successfully account created", Toast.LENGTH_SHORT).show();
     }
