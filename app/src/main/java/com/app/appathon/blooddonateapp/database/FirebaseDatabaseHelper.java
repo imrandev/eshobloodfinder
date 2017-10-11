@@ -267,6 +267,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
         });
     }
 
+
     public void SendRequestMsgToUser(String userId, String SendNotificationId, String name, String blood){
         final String message = "Hi, I'm " + Config.CURRENT_USERNAME + ". I have just checked your profile, I need " + blood
                 + " blood urgent. If you are interested to donate, please contact with me";
