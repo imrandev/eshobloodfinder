@@ -4,9 +4,13 @@ import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.InboxAdapter;
@@ -17,6 +21,9 @@ import com.app.appathon.blooddonateapp.fragments.IncomingFragment;
 import com.app.appathon.blooddonateapp.fragments.OutgoingFragment;
 import com.app.appathon.blooddonateapp.model.Inbox;
 import com.app.appathon.blooddonateapp.model.TabsItem;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +44,7 @@ public class InboxActivity extends AppCompatActivity implements MaterialTabListe
     private MaterialTabHost tabHost;
     private ViewPager viewPager;
     private List<TabsItem> mTabs = new ArrayList<>();
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,26 @@ public class InboxActivity extends AppCompatActivity implements MaterialTabListe
         mTabs.add(new TabsItem("Received", IncomingFragment.newInstance()));
         mTabs.add(new TabsItem("Sent", OutgoingFragment.newInstance()));
 
+        final CardView cardView = (CardView) findViewById(R.id.card);
+        final Animation slide_down = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.slide_down);
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(int i) {
+                cardView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAdLoaded() {
+                cardView.setVisibility(View.VISIBLE);
+                cardView.setAnimation(slide_down);
+                viewPager.setAnimation(slide_down);
+            }
+        });
+        mAdView.loadAd(new AdRequest.Builder().build());
+        
         viewPager = (ViewPager) findViewById(R.id.viewPager);
 
         //Adding TabHost
