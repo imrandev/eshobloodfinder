@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.AndroidResources;
 import android.support.v7.widget.AppCompatImageButton;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,10 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -49,7 +44,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
     private InterstitialAd interstitialAd;
     boolean exitApp = false;
-    private EditText etEmail, etPwd;
+    private EditText etPhone, etPwd;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
@@ -78,7 +73,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         mDatabase= FirebaseDatabase.getInstance().getReference();
 
-        etEmail = (EditText)findViewById(R.id.sin_email);
+        etPhone = (EditText)findViewById(R.id.sin_email);
         etPwd = (EditText)findViewById(R.id.sin_password);
         btn_signIn = (Button) findViewById(R.id.btnSignIn);
         btn_send = (AppCompatImageButton) findViewById(R.id.btnSend);
@@ -101,7 +96,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             public void onVerificationFailed(FirebaseException e) {
                 Log.w(TAG, "onVerificationFailed", e);
                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    etEmail.setError("Invalid phone number.");
+                    etPhone.setError("Invalid phone number.");
                 } else if (e instanceof FirebaseTooManyRequestsException) {
                     Snackbar.make(findViewById(android.R.id.content), "Quota exceeded.",
                             Snackbar.LENGTH_SHORT).show();
@@ -201,8 +196,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 verifyPhoneNumberWithCode(mVerificationId, code);
                 break;
             case R.id.btnSend:
+                String phoneNm = etPhone.getText().toString();
+                if (TextUtils.isEmpty(phoneNm)) {
+                    etPhone.setError("Cannot be empty.");
+                    return;
+                }
                 progressBar.setVisibility(View.VISIBLE);
-                startPhoneNumberVerification(etEmail.getText().toString());
+                startPhoneNumberVerification(phoneNm);
                 break;
             default:
                 break;
