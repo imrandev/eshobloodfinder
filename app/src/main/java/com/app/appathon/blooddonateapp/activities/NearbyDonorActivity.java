@@ -74,6 +74,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private static final int LOCATION_PERMISSION_ID = 1001;
     private String userId;
     private String SUBMIT_PRESSED = "OPEN";
+    private FirebaseDatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         setContentView(R.layout.activity_nearby_donor);
 
         //Initializing Firebase Database Reference
-        FirebaseDatabaseHelper databaseHelper = new FirebaseDatabaseHelper(this, this);
+        databaseHelper = new FirebaseDatabaseHelper(this, this);
         databaseHelper.getAvailableUserListData();
 
         // Handle Toolbar
@@ -281,9 +282,13 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 .target(latlng).zoom(16).build();
         gMap.animateCamera(CameraUpdateFactory
                 .newCameraPosition(cameraPosition));
+        setMapViewByDonors(userArrayList);
+    }
 
+    private void setMapViewByDonors(ArrayList<User> userArrayList) {
         final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
 
+        gMap.clear();
         if (!userArrayList.isEmpty()) {
             for (int i = 0; i < userArrayList.size(); i++) {
                 String blood = userArrayList.get(i).getBloodGroup();
@@ -301,8 +306,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 markerOption.position(latLng);
                 markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
                 markerOption.title(userName);
-
-                final int j = i;
 
                 gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                     @Override
@@ -407,10 +410,54 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_filter:
+            case R.id.all:
+                setMapViewByDonors(filterByBlood(userArrayList, "All"));
+                return true;
+            case R.id.a_pos:
+                setMapViewByDonors(filterByBlood(userArrayList, "A+"));
+                return true;
+            case R.id.a_neg:
+                setMapViewByDonors(filterByBlood(userArrayList, "A-"));
+                return true;
+            case R.id.b_pos:
+                setMapViewByDonors(filterByBlood(userArrayList, "B+"));
+                return true;
+            case R.id.b_neg:
+                setMapViewByDonors(filterByBlood(userArrayList, "B-"));
+                return true;
+            case R.id.ab_pos:
+                setMapViewByDonors(filterByBlood(userArrayList, "AB+"));
+                return true;
+            case R.id.ab_neg:
+                setMapViewByDonors(filterByBlood(userArrayList, "AB-"));
+                return true;
+            case R.id.o_pos:
+                setMapViewByDonors(filterByBlood(userArrayList, "O+"));
+                return true;
+            case R.id.o_neg:
+                setMapViewByDonors(filterByBlood(userArrayList, "O-"));
                 return true;
             default:
                 return false;
+        }
+    }
+
+    private ArrayList<User> filterByBlood(ArrayList<User> models, String query) {
+
+        if(query.compareTo("All") == 0){
+            databaseHelper.getAvailableUserListData();
+            models = userArrayList;
+            return models;
+        } else {
+            final String lowerCaseQuery =  query.toLowerCase();
+            final ArrayList<User> filteredModelList = new ArrayList<>();
+            for (User model : models) {
+                final String text = model.bloodGroup.toLowerCase();
+                if (text.equals(lowerCaseQuery)) {
+                    filteredModelList.add(model);
+                }
+            }
+            return filteredModelList;
         }
     }
 }

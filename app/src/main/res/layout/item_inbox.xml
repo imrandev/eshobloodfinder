@@ -3,6 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/inbox_card"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
     app:cardElevation="0dp"
     app:cardCornerRadius="0dp"
     app:cardUseCompatPadding="true"
@@ -97,7 +99,8 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:background="@drawable/btn_normal"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
                 android:textStyle="bold"
                 android:id="@+id/op1"
                 android:layout_weight="1"
@@ -113,7 +116,8 @@
                 android:background="@android:color/darker_gray" />
 
             <TextView
-                android:background="@drawable/btn_normal"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
                 android:textStyle="bold"
                 android:id="@+id/op2"
                 android:gravity="center"

@@ -122,7 +122,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
 
     public void getAvailableUserListData(){
         final List<User> availableUserList= new ArrayList<>();
-        mDatabase.child("users").addValueEventListener(new ValueEventListener() {
+        mDatabase.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (availableUserList.size() > 0)

@@ -40,7 +40,7 @@ public class OutgoingAdapter extends RecyclerView.Adapter<OutgoingAdapter.ViewHo
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_inbox, parent, false);
+        View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_outbox, parent, false);
         return new ViewHolder(rootView);
     }
 
@@ -54,8 +54,8 @@ public class OutgoingAdapter extends RecyclerView.Adapter<OutgoingAdapter.ViewHo
         holder.msg_count.setText(String.valueOf(inboxArrayList.get(position).getCount()));
         holder.msg_body.setText(inboxArrayList.get(position).getMessage());
 
-        holder.op1.setText(R.string.rating);
-        holder.op2.setText(R.string.fake);
+//        holder.op1.setText(R.string.rating);
+//        holder.op2.setText(R.string.fake);
 
         holder.msg_body.setTypeface(ThemeFont);
         holder.msg_time.setTypeface(ThemeFont);
@@ -86,8 +86,8 @@ public class OutgoingAdapter extends RecyclerView.Adapter<OutgoingAdapter.ViewHo
             msg_time = (TextView) itemView.findViewById(R.id.sending_time);
             msg_count = (TextView) itemView.findViewById(R.id.msg_count);
             cardView = (CardView) itemView.findViewById(R.id.inbox_card);
-            op1 = (TextView) itemView.findViewById(R.id.op1);
-            op2 = (TextView) itemView.findViewById(R.id.op2);
+//            op1 = (TextView) itemView.findViewById(R.id.op1);
+//            op2 = (TextView) itemView.findViewById(R.id.op2);
         }
     }
 }

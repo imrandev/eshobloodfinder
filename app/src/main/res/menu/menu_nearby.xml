@@ -9,6 +9,12 @@
         app:showAsAction="ifRoom">
         <menu>
             <item
+                android:title="All"
+                android:id="@+id/all"
+                app:showAsAction="never"
+                />
+
+            <item
                 android:title="A+"
                 android:id="@+id/a_pos"
                 app:showAsAction="never"
