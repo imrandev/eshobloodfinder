@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:gravity="center"
-                    android:text="SIGN ME UP"
+                    android:text="ADD YOUR INFO"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
                     android:textColor="@android:color/white" />
 

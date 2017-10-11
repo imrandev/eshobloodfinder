@@ -1,11 +1,14 @@
 package com.app.appathon.blooddonateapp.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.AndroidResources;
 import android.support.v7.widget.AppCompatImageButton;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,10 +54,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private DatabaseReference mDatabase;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private String mVerificationId;
-    private EditText emailToPassVerify;
     private static final String TAG = "SignInActivity";
     private Button btn_signIn;
     private AppCompatImageButton btn_send;
+    private ProgressBar progressBar;
+    private TextInputLayout textInputLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,19 +72,19 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         TextView signMe = (TextView) findViewById(R.id.sin_me);
         signMe.setTypeface(ThemeFont);
 
+        progressBar = (ProgressBar) findViewById(R.id.marker_progress);
+
         mDatabase= FirebaseDatabase.getInstance().getReference();
 
         etEmail = (EditText)findViewById(R.id.sin_email);
         etPwd = (EditText)findViewById(R.id.sin_password);
         btn_signIn = (Button) findViewById(R.id.btnSignIn);
         btn_send = (AppCompatImageButton) findViewById(R.id.btnSend);
-        TextView tv_signUp = (TextView) findViewById(R.id.tv_signUp);
+        textInputLayout = (TextInputLayout) findViewById(R.id.codeView);
 
         btn_signIn.setOnClickListener(this);
         btn_send.setOnClickListener(this);
-        tv_signUp.setOnClickListener(this);
 
-        etPwd.setVisibility(View.INVISIBLE);
         btn_signIn.setVisibility(View.INVISIBLE);
 
         mAuth = FirebaseAuth.getInstance();
@@ -105,8 +110,9 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             public void onCodeSent(String verificationId,
                                    PhoneAuthProvider.ForceResendingToken token) {
                 Log.d(TAG, "onCodeSent:" + verificationId);
+                progressBar.setVisibility(View.INVISIBLE);
                 mVerificationId = verificationId;
-                etPwd.setVisibility(View.VISIBLE);
+                textInputLayout.setVisibility(View.VISIBLE);
                 btn_signIn.setVisibility(View.VISIBLE);
             }
         };
@@ -115,12 +121,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private void startPhoneNumberVerification(String phoneNumber) {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
                 phoneNumber,        // Phone number to verify
-                60,                 // Timeout duration
+                120,                 // Timeout duration
                 TimeUnit.SECONDS,   // Unit of timeout
                 this,               // Activity (for callback binding)
                 mCallbacks);        // OnVerificationStateChangedCallbacks
     }
-
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         mAuth.signInWithCredential(credential)
@@ -135,12 +140,14 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     for(DataSnapshot data: dataSnapshot.getChildren()){
-                                        if (data.child(user.getUid()).exists()) {
+                                        if (data.child(user.getUid()).child("id").exists()) {
+                                            progressBar.setVisibility(View.INVISIBLE);
                                             launchInter();
                                             loadInterstitial();
                                             startActivity(new Intent(SignInActivity.this, MainActivity.class));
                                             finish();
                                         } else {
+                                            progressBar.setVisibility(View.INVISIBLE);
                                             startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
                                             finish();
                                         }
@@ -173,6 +180,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         // Check auth on Activity start
         if (mAuth.getCurrentUser() != null) {
             //Go to MainActivity
+            launchInter();
+            loadInterstitial();
             startActivity(new Intent(SignInActivity.this, MainActivity.class));
             finish();
         }
@@ -190,75 +199,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 verifyPhoneNumberWithCode(mVerificationId, code);
                 break;
             case R.id.btnSend:
+                progressBar.setVisibility(View.VISIBLE);
                 startPhoneNumberVerification(etEmail.getText().toString());
-                break;
-            case R.id.tv_signUp :
-                Intent home = new Intent(this, SignUpActivity.class);
-                startActivity(home);
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
-                finish();
                 break;
             default:
                 break;
         }
-    }
-
-    private boolean validateForm() {
-        boolean result = true;
-
-        if (TextUtils.isEmpty(etEmail.getText().toString())) {
-            etEmail.setError("Required");
-            result = false;
-        } else {
-            etEmail.setError(null);
-        }
-
-        if (TextUtils.isEmpty(etPwd.getText().toString())) {
-            etPwd.setError("Required");
-            result = false;
-        } else {
-            etPwd.setError(null);
-        }
-
-        return result;
-    }
-
-    private void initResetPassDialog(){
-        MaterialDialog.Builder builder  = new MaterialDialog.Builder(this)
-                .title("Reset Password")
-                .customView(R.layout.password_recover, true)
-                .titleColorRes(R.color.colorPrimary)
-                .positiveText("Send")
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        String email = emailToPassVerify.getText().toString();
-                        if (TextUtils.isEmpty(email)) {
-                            emailToPassVerify.setError("Required");
-                        } else {
-                            emailToPassVerify.setError(null);
-                            sendEmailToResetPassword(email);
-                        }
-                    }
-                });
-
-        MaterialDialog dialog = builder.build();
-        emailToPassVerify = (EditText) dialog.findViewById(R.id.reset_email);
-        dialog.show();
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-    }
-
-    private void sendEmailToResetPassword(String email) {
-        mAuth.sendPasswordResetEmail(email)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(SignInActivity.this,
-                                    "An email is sent to your mail address for resetting password", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
     }
 
     public void launchInter(){
