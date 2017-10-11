@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:id="@+id/spinner"
+        android:id="@+id/menu_search"
         android:background="@color/colorPrimary"
-        android:title="ActionBar Spinner"
-        app:actionViewClass="com.jaredrummler.materialspinner.MaterialSpinner"
+        android:title="@string/search"
+        android:icon="@drawable/btn_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item
+        android:id="@+id/menu_map"
+        android:background="@color/colorPrimary"
+        android:title="@string/menu_item_map"
+        android:icon="@drawable/btn_map"
         app:showAsAction="ifRoom" />
+
 </menu>

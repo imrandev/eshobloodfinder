@@ -1,265 +1,411 @@
 package com.app.appathon.blooddonateapp.fragments;
 
-import android.content.DialogInterface;
+import android.Manifest;
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.database.Cursor;
-import android.location.Location;
-import android.location.LocationManager;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.util.ArraySet;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.appathon.blooddonateapp.OnBackPressedListener;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.MainActivity;
 import com.app.appathon.blooddonateapp.adapter.AvailableAdapter;
-import com.app.appathon.blooddonateapp.adapter.CustomListAdapter;
-import com.app.appathon.blooddonateapp.adapter.DBAdapter;
-import com.app.appathon.blooddonateapp.utils.GeocoderHandler;
-import com.app.appathon.blooddonateapp.utils.LocationAddress;
-import com.jaredrummler.materialspinner.MaterialSpinner;
-import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
+import com.app.appathon.blooddonateapp.app.BloodApplication;
+import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
+import com.app.appathon.blooddonateapp.helper.ConnectivityReceiver;
+import com.app.appathon.blooddonateapp.helper.SimpleDividerItemDecoration;
+import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
+import com.app.appathon.blooddonateapp.model.User;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import br.com.mauker.materialsearchview.MaterialSearchView;
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AvailableDonors#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class AvailableDonors extends Fragment implements OnBackPressedListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.AvailableDonorInterface,
+        ConnectivityReceiver.ConnectivityReceiverListener, MainActivity.FragmentCommunicator {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-    private FloatingActionButton mFabButton,mSearchFab,mListFab,mGPSFab;
-    private Animation fab_open,fab_close,rotate_forward,rotate_backward;
-    private static final String[] BLOOD_TYPE = {
-            "All", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
-    };
-    private Boolean isFabOpen = false;
-    private MaterialSearchView searchView;
-    private PopupMenu popup;
-
-    private DBAdapter dbHelper;
-    private Cursor cursor;
+    private FloatingActionButton mFabButton;
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private View rootView;
+    private List<User> userArrayList = new ArrayList<>();
+    private boolean isConnected;
+    private AvailableAdapter adapter;
+    private int FLAG = 0;
+    private List<User> filteredModelList;
+    private String phone;
+
+    private static final int REQUEST_PHONE_CALL = 1;
 
     public AvailableDonors() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AvailableDonors.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AvailableDonors newInstance(String param1, String param2) {
+    public static AvailableDonors newInstance(){
         AvailableDonors fragment = new AvailableDonors();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onAttach(Activity activity){
+        super.onAttach(activity);
+        ((MainActivity)getContext()).fragmentCommunicator = this;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_available_donors, container, false);
+        rootView = inflater.inflate(R.layout.fragment_available_donors, container, false);
+
+        isConnected = ConnectivityReceiver.isConnected();
+
         mFabButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        mSearchFab = (FloatingActionButton) rootView.findViewById(R.id.fab1);
-        mListFab = (FloatingActionButton) rootView.findViewById(R.id.fab2);
-        mGPSFab = (FloatingActionButton) rootView.findViewById(R.id.fab3);
-
-        fab_open = AnimationUtils.loadAnimation(getContext(), R.anim.fab_open);
-        fab_close = AnimationUtils.loadAnimation(getContext(),R.anim.fab_close);
-        rotate_forward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_forward);
-        rotate_backward = AnimationUtils.loadAnimation(getContext(),R.anim.rotate_backward);
-
-        searchView = (MaterialSearchView) rootView.findViewById(R.id.search_view);
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         mFabButton.setOnClickListener(onFabButtonListener);
-        mSearchFab.setOnClickListener(onFabButtonListener);
-        mListFab.setOnClickListener(onFabButtonListener);
-        mGPSFab.setOnClickListener(onFabButtonListener);
-
-        dbHelper = new DBAdapter(getContext());
-        dbHelper.open();
-
-        cursor = dbHelper.fetchAllInfo();
-
-        dbHelper.close();
+        showCloudSign(isConnected);
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.availableDonor);
         recyclerView.setHasFixedSize(true);
-
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
 
-        recyclerView.setAdapter(new AvailableAdapter(getContext(),cursor));
+        FirebaseDatabaseHelper databaseHelper = new FirebaseDatabaseHelper(getActivity(), this);
+        databaseHelper.getAvailableUserListData();
 
-
-
-        ArrayList arrayList = new ArrayList<String>(Arrays.asList(BLOOD_TYPE));
-
-        //MaterialBetterSpinner spinner = (MaterialBetterSpinner ) rootView.findViewById(R.id.mSpinner);
-        //spinner.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_item,arrayList));
-        /*spinner.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        spinner.setItems(BLOOD_TYPE);
-        spinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
-
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-                Snackbar.make(view, "Clicked " + item, Snackbar.LENGTH_LONG).show();
-            }
-        });
-        spinner.setOnNothingSelectedListener(new MaterialSpinner.OnNothingSelectedListener() {
-
-            @Override public void onNothingSelected(MaterialSpinner spinner) {
-                Snackbar.make(spinner, "Nothing selected", Snackbar.LENGTH_LONG).show();
-            }
-        });*/
-
-        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                //Do some magic
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Do some magic
-                return false;
+            public void onRefresh() {
+                // Refresh items
+                FLAG = 0;
+                setSwipeRefreshData();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
-        searchView.setSearchViewListener(new MaterialSearchView.SearchViewListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
-            public void onSearchViewOpened() {
-
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy){
+                if (dy > 0 && mFabButton.isShown()){
+                    mFabButton.hide();
+                }
+                else if(dy < 0) {
+                    mFabButton.show();
+                }
             }
 
             @Override
-            public void onSearchViewClosed() {
-                //Do some magic
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+
+                if ( newState == RecyclerView.SCROLL_STATE_IDLE){
+                }
+                super.onScrollStateChanged(recyclerView, newState);
             }
         });
+
         return rootView;
     }
 
-    public void animateFAB(){
+    @Override
+    public void onStart() {
+        super.onStart();
+        // register connection status listener
+        BloodApplication.getInstance().setConnectivityListener(this);
+    }
 
-        if(isFabOpen){
-
-            mFabButton.startAnimation(rotate_backward);
-            mSearchFab.startAnimation(fab_close);
-            mListFab.startAnimation(fab_close);
-            mSearchFab.setClickable(false);
-            mListFab.setClickable(false);
-            isFabOpen = false;
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        int activityValue = ((MainActivity) getContext()).someIntValue;
+        if (activityValue == 0) {
+            //show one view
         } else {
-
-            mFabButton.startAnimation(rotate_forward);
-            mSearchFab.startAnimation(fab_open);
-            mListFab.startAnimation(fab_open);
-            mSearchFab.setClickable(true);
-            mListFab.setClickable(true);
-            isFabOpen = true;
-
+            // show other view
         }
+    }
+
+    public void onStop() {
+        super.onStop();
+        ComponentName component = new ComponentName(getContext(), ConnectivityReceiver.class);
+        //Disable
+        getContext().getPackageManager().setComponentEnabledSetting(
+                component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     private View.OnClickListener onFabButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            PopupMenu popup = new PopupMenu(getContext(), v);
+            popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
+            MenuPopupHelper menuHelper = new MenuPopupHelper(getContext(), (MenuBuilder) popup.getMenu(), v);
+            menuHelper.setForceShowIcon(true);
 
-            int id = v.getId();
-            switch (id){
-                case R.id.fab:
-                    if (searchView.isOpen()) {
-                        searchView.closeSearch();
-                        animateFAB();
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()){
+                        case 0:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 1:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 2:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 3:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 4:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 5:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 6:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        case 7:
+                            setRecyclerViewAdapter(filterByBlood(userArrayList, item.toString()), false);
+                            break;
+                        default:
+                            break;
                     }
-                    animateFAB();
-                    break;
-                case R.id.fab1:
-                    if (searchView.isOpen()) {
-                        searchView.closeSearch();
-                    } else {
-                        searchView.openSearch();
-                    }
-                    animateFAB();
-                    break;
-                case R.id.fab2:
-                    popup = new PopupMenu(getContext(), v);
-                    popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+                    return true;
+                }
+            });
+            menuHelper.show();
+        }
+    };
 
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        public boolean onMenuItemClick(MenuItem item) {
-                            Toast.makeText(getContext(), "Clicked popup menu item " + item.getTitle(),
-                                    Toast.LENGTH_SHORT).show();
-                            return true;
+    private List<User> filter(List<User> models, String query) {
+        FLAG = 1;
+        String lowerCaseQuery = query.toLowerCase();
+        filteredModelList = new ArrayList<>();
+        for (User model : models) {
+            String add = model.address.toLowerCase() + " " + model.bloodGroup.toLowerCase();
+            String[] words = add.replace(",", "").split("\\s");
+            //check duplicate word
+            for (int i = 0; i < words.length; i++) {
+                for (int j = 0; j < words.length; j++) {
+                    if (words[i].equals(words[j])) {
+                        if (i != j)
+                            words[j] = ""; // remove duplicate
+                    }
+                }
+            }
+
+            String wordAdd = Arrays.toString(words).replace(",","").replace("[", "").replace("]", "");
+            List<String> queryWord = new ArrayList<>();
+
+            for (String w : wordAdd.split("\\s")){
+                if (lowerCaseQuery.contains(w)) {
+                    queryWord.add(w);
+                }
+            }
+
+            String replace = getPlainString(queryWord).replaceAll("\\s", "");
+            if (lowerCaseQuery.replaceAll("\\s", "").compareTo(replace)==0) {
+                filteredModelList.add(model);
+            } else {
+                if (lowerCaseQuery.replaceAll("\\s", "").compareTo(
+                        rearrangeQuery(lowerCaseQuery, getPlainString(queryWord)))==0){
+                    filteredModelList.add(model);
+                    break;
+                }
+            }
+        }
+        return filteredModelList;
+    }
+
+    private String rearrangeQuery(String lowerCaseQuery, String data) {
+        String[] queryArray = lowerCaseQuery.split("\\s");
+        String[] s = data.split("\\s");
+
+        for (int i=0; i<queryArray.length; i++){
+            if (i< s.length){
+                for (int j=0; j<s.length; j++){
+                    if (i != j){
+                        if (s[j].contains(queryArray[i])){
+                            String d = s[i];
+                            s[i] = s[j];
+                            s[j] = d;
                         }
-                    });
-                    popup.show();
-                    animateFAB();
-                    break;
+                    }
+                }
+            }
+        }
+
+        return Arrays.toString(s).replace(",","").replace("[", "").replace("]", "").replaceAll("\\s", "");
+    }
+
+    private String getPlainString(List<String> s){
+        return s.toString().replace(",","").replace("[", "").replace("]", "");
+    }
+
+    private List<User> filterByBlood(List<User> models, String query) {
+
+        if(FLAG == 1){
+            models = filteredModelList;
+            FLAG = 0;
+        }
+
+        final String lowerCaseQuery =  query.toLowerCase();
+        final List<User> filteredModelList = new ArrayList<>();
+        for (User model : models) {
+            final String text = model.bloodGroup.toLowerCase();
+            if (text.equals(lowerCaseQuery)) {
+                filteredModelList.add(model);
+            }
+        }
+        return filteredModelList;
+    }
+
+    private void setSwipeRefreshData(){
+
+        setRecyclerViewAdapter(userArrayList,true);
+    }
+
+    private void setRecyclerViewAdapter(List<User> arrayList, boolean isRefreshing){
+        showCloudSign(isConnected);
+        if (!isRefreshing){
+            adapter = new AvailableAdapter(getActivity(),arrayList);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.refreshList(userArrayList);
+            recyclerView.setAdapter(adapter);
+        }
+        adapter.setCallToUser(onItemCallToUser);
+        adapter.notifyDataSetChanged();
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private void snackBarView(String message) {
+        int color = Color.RED;
+        int TIME_OUT = Snackbar.LENGTH_INDEFINITE;
+
+        Snackbar snackbar = Snackbar
+                .make(rootView, message, TIME_OUT);
+        View sbView = snackbar.getView();
+        TextView textView = (TextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(color);
+        snackbar.show();
+    }
+
+    @Override
+    public void onNetworkConnectionChanged(boolean isConnected) {
+        if (!isConnected){
+            snackBarView("No Internet Access!");
+        }
+    }
+
+    private void showCloudSign(boolean isConnected){
+        if (isConnected){
+            swipeRefreshLayout.setRefreshing(true);
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void passDataToFragment(String value) {
+        if (TextUtils.isEmpty(value)) {
+
+        } else {
+            setRecyclerViewAdapter(filter(userArrayList, value), false);
+        }
+    }
+
+    @Override
+    public void getAvailableDonorInfo(String id, String email, List<User> users) {
+        swipeRefreshLayout.setRefreshing(true);
+        if (userArrayList.size()>0) {
+            userArrayList.clear();
+        }
+        for (User user : users){
+            userArrayList.add(user);
+        }
+        setRecyclerViewAdapter(userArrayList, false);
+    }
+
+    @Override
+    public void onFirebaseInternalError(String error) {
+        snackBarView(error);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    private ActionCallToUser onItemCallToUser = new ActionCallToUser() {
+        @Override
+        public void onCall(View v, int position) {
+            phone = userArrayList.get(position).getPhone();
+            try {
+                Intent phoneIntent = new Intent(Intent.ACTION_CALL);
+                phoneIntent.setData(Uri.parse("tel:" + phone));
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
+                } else {
+                    startActivity(phoneIntent);
+                }
+            } catch (android.content.ActivityNotFoundException | SecurityException ex) {
+                Toast.makeText(getContext(),
+                        "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
             }
         }
     };
 
     @Override
-    public void onBackPressed() {
-        List<Fragment> fragmentList = getFragmentManager().getFragments();
-        if (fragmentList != null) {
-            //TODO: Perform your logic to pass back press here
-            for(Fragment fragment : fragmentList){
-                if(fragment instanceof OnBackPressedListener){
-                    ((OnBackPressedListener)fragment).onBackPressed();
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PHONE_CALL: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        Intent phoneIntent = new Intent(Intent.ACTION_CALL);
+                        phoneIntent.setData(Uri.parse("tel:" + phone));
+                        startActivity(phoneIntent);
+
+                    } catch (android.content.ActivityNotFoundException | SecurityException ex) {
+                        Toast.makeText(getContext(),
+                                "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+
                 }
+                return;
             }
         }
     }
