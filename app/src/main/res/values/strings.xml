@@ -56,5 +56,6 @@
     <string name="edit">Edit</string>
     <string name="hint_email"> Email (Optional)</string>
     <string name="last_donated">Last Donated : Never</string>
+    <string name="call">Call</string>
 
 </resources>

@@ -105,7 +105,7 @@
                 android:clickable="true"
                 android:background="?attr/selectableItemBackground"
                 android:gravity="center"
-                android:text="@string/profile"
+                android:text="@string/call"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textColor="@android:color/darker_gray"
                 android:textStyle="bold" />
