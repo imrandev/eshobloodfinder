@@ -16,7 +16,7 @@ import com.onesignal.OneSignal;
 import org.json.JSONObject;
 
 /**
- * Created by IMRAN on 6/29/2017.
+ * Created by TAOHID on 6/29/2017.
  */
 
 public class BloodApplication extends Application {
