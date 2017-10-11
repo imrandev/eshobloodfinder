@@ -1,10 +1,14 @@
 package com.app.appathon.blooddonateapp.adapter;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +20,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
+import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
 import com.app.appathon.blooddonateapp.model.Inbox;
 
 import java.util.ArrayList;
@@ -26,6 +31,7 @@ import java.util.ArrayList;
 
 public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> {
 
+    private static final int REQUEST_PHONE_CALL = 1;
     private ArrayList<Inbox> inboxArrayList;
     private Activity activity;
     public InboxAdapter(ArrayList<Inbox> inboxArrayList, Activity activity) {
@@ -57,24 +63,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.op1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new MaterialDialog.Builder(activity)
-                        .title(phone)
-                        .icon(activity.getResources().getDrawable(R.drawable.ic_phone_small_red))
-                        .positiveText("Call")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                try {
-                                    Intent phoneIntent = new Intent(Intent.ACTION_CALL);
-                                    phoneIntent.setData(Uri.parse("tel:" + phone));
-                                    activity.startActivity(phoneIntent);
-                                } catch (android.content.ActivityNotFoundException | SecurityException ex) {
-                                    Toast.makeText(activity,
-                                            "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        })
-                        .show();
+                    showDialogWindow(phone);
             }
         });
 
@@ -87,6 +76,33 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
 
             }
         });
+    }
+
+    private void showDialogWindow(final String phone) {
+        new MaterialDialog.Builder(activity)
+                .title(phone)
+                .icon(ContextCompat.getDrawable(activity, R.drawable.ic_phone_round))
+                .positiveText("Call")
+                .backgroundColorRes(R.color.dialog_color)
+                .titleColorRes(android.R.color.white)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        try {
+                            Intent phoneIntent = new Intent(Intent.ACTION_CALL);
+                            phoneIntent.setData(Uri.parse("tel:" + phone));
+                            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
+                            } else {
+                                activity.startActivity(phoneIntent);
+                            }
+                        } catch (android.content.ActivityNotFoundException | SecurityException ex) {
+                            Toast.makeText(activity,
+                                    "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .show();
     }
 
     @Override
