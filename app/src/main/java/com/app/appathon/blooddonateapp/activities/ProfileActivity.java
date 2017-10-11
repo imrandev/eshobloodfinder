@@ -202,7 +202,8 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         MaterialDialog.Builder builder  = new MaterialDialog.Builder(this)
                 .title("Edit Profile")
                 .customView(R.layout.edit_profile, true)
-                .titleColorRes(android.R.color.darker_gray)
+                .titleColorRes(android.R.color.white)
+                .backgroundColorRes(R.color.dialog_color)
                 .positiveText("Update")
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override

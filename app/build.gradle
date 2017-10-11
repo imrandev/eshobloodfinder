@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'taohid'
             keyPassword 'diya4112'
-            storeFile file('I:/Android Studio Project/android_key_for_signed_apk.jks')
+            storeFile file('E:/Android/android_key_for_signed_apk.jks')
             storePassword 'diya4112'
         }
     }

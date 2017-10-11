@@ -1,9 +1,6 @@
 <resources>
     <string name="app_name">Esho Blood Finder</string>
 
-    <string name="banner_ad_unit_id">ca-app-pub-6348813731309248/8964399384</string>
-    <string name="Interstitial">ca-app-pub-6348813731309248/4758874148</string>
-
     <!--Popup Strings-->
     <string name="menu_all">Dhaka</string>
     <string name="menu_ap">Chittagong</string>

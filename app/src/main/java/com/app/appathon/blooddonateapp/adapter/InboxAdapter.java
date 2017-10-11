@@ -28,11 +28,9 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
 
     private ArrayList<Inbox> inboxArrayList;
     private Activity activity;
-    private ArrayList<String> msg_count;
-    public InboxAdapter(ArrayList<Inbox> inboxArrayList, Activity activity, ArrayList<String> msg_count) {
+    public InboxAdapter(ArrayList<Inbox> inboxArrayList, Activity activity) {
         this.inboxArrayList = inboxArrayList;
         this.activity = activity;
-        this.msg_count = msg_count;
     }
 
     @Override
@@ -48,7 +46,7 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.sender_name.setText(inboxArrayList.get(position).getSenderName());
         holder.msg_thumb.setText(String.valueOf(inboxArrayList.get(position).getSenderName().charAt(0)));
         holder.msg_time.setText(inboxArrayList.get(position).getSendTime());
-        holder.msg_count.setText(String.valueOf(msg_count.get(position)));
+        holder.msg_count.setText(String.valueOf(inboxArrayList.get(position).getCount()));
         holder.msg_body.setText(inboxArrayList.get(position).getMessage());
 
         holder.op1.setText(R.string.accept);

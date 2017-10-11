@@ -22,6 +22,7 @@ import java.util.List;
 public class AllDonors extends Fragment implements FirebaseDatabaseHelper.AllDonorInterface {
 
     private RecyclerView recyclerView;
+    private List<User> userArrayList = new ArrayList<>();
 
     public AllDonors() {
         // Required empty public constructor
@@ -58,7 +59,10 @@ public class AllDonors extends Fragment implements FirebaseDatabaseHelper.AllDon
 
     @Override
     public void getAllDonorInfo(String id, String email, List<User> users) {
-        List<User> userArrayList = users;
+        if (userArrayList.size() > 0)
+            userArrayList.clear();
+
+        userArrayList = users;
         setRecyclerViewAdapter(new AllAdapter(getActivity(), userArrayList));
     }
 

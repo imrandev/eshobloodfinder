@@ -32,7 +32,6 @@ public class IncomingFragment extends Fragment implements FirebaseDatabaseHelper
 
     private RecyclerView incomingView;
     private ArrayList<Inbox> incomingList = new ArrayList<>();
-    private ArrayList<String> msg_count = new ArrayList<>();
 
     public IncomingFragment() {
         // Required empty public constructor
@@ -63,10 +62,12 @@ public class IncomingFragment extends Fragment implements FirebaseDatabaseHelper
     }
 
     @Override
-    public void getIncomingInboxData(String id, String email, List<Inbox> inboxes, List<String> count) {
+    public void getIncomingInboxData(String id, String email, List<Inbox> inboxes) {
+        if (incomingList.size()>0)
+            incomingList.clear();
+
         incomingList.addAll(inboxes);
-        msg_count.addAll(count);
-        incomingView.setAdapter(new InboxAdapter(incomingList, getActivity(), msg_count));
+        incomingView.setAdapter(new InboxAdapter(incomingList, getActivity()));
     }
 
     @Override

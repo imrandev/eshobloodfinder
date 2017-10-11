@@ -9,16 +9,26 @@ public class Inbox {
     private String sendTime;
     private String senderName;
     private String senderPhone;
+    public int count;
 
     public Inbox(){
 
     }
 
-    public Inbox(String message, String sendTime, String senderName, String senderPhone) {
+    public Inbox(String message, String sendTime, String senderName, String senderPhone, int count) {
         this.message = message;
         this.sendTime = sendTime;
         this.senderName = senderName;
         this.senderPhone = senderPhone;
+        this.count = count;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public String getSenderPhone() {

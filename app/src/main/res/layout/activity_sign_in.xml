@@ -65,9 +65,9 @@
                             android:background="@android:color/transparent"
                             android:gravity="center_vertical"
                             android:hint="@string/hint_phone"
-                            android:textColorHint="@android:color/white"
-                            android:inputType="textEmailAddress"
-                            android:textColor="@android:color/white" />
+                            android:inputType="phone"
+                            android:textColor="@android:color/white"
+                            android:textColorHint="@android:color/white" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -97,7 +97,7 @@
                         android:background="@android:color/transparent"
                         android:layout_gravity="center"
                         android:hint="@string/hint_password"
-                        android:inputType="textPassword"
+                        android:inputType="number"
                         android:layout_margin="10dp"
                         android:textColor="@android:color/white"
                         android:textColorHint="@android:color/white" />

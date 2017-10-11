@@ -24,8 +24,6 @@ import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.PlacesAutoCompleteAdapter;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.app.appathon.blooddonateapp.model.User;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;

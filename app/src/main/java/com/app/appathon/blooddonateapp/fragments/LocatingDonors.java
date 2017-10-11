@@ -3,19 +3,13 @@ package com.app.appathon.blooddonateapp.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.TabsAdapter;
 import com.app.appathon.blooddonateapp.model.TabsItem;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +23,6 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
     private MaterialTabHost tabHost;
     private ViewPager viewPager;
     private List<TabsItem> mTabs = new ArrayList<>();
-    private AdView mAdView;
 
     public LocatingDonors() {
         // Required empty public constructor
@@ -53,26 +46,6 @@ public class LocatingDonors extends Fragment implements MaterialTabListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_locating_donors, container, false);
-
-        final CardView cardView = (CardView) rootView.findViewById(R.id.card);
-        final Animation slide_down = AnimationUtils.loadAnimation(getContext(),
-                R.anim.slide_down);
-
-        mAdView = (AdView) rootView.findViewById(R.id.adView);
-        mAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdFailedToLoad(int i) {
-                cardView.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAdLoaded() {
-                cardView.setVisibility(View.VISIBLE);
-                cardView.setAnimation(slide_down);
-                viewPager.setAnimation(slide_down);
-            }
-        });
-        mAdView.loadAd(new AdRequest.Builder().build());
         viewPager = (ViewPager) rootView.findViewById(R.id.viewPager);
 
         //Adding TabHost

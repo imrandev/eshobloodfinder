@@ -25,8 +25,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -44,6 +46,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
     private DatabaseReference mDatabase;
     private FirebaseUser firebaseUser;
     private String userId, userPhone;
+    private int c = 1;
 
     public FirebaseDatabaseHelper(Activity context, AvailableDonorInterface availableDonorInterface) {
         this.context = context;
@@ -76,6 +79,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
 
     private void initFirebase() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.keepSynced(false);
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser();
 
@@ -103,12 +107,12 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
     }
 
     public interface IncomingInboxInterface {
-        void getIncomingInboxData(String id, String email, List<Inbox> inboxes, List<String> count);
+        void getIncomingInboxData(String id, String email, List<Inbox> inboxes);
         void onFirebaseInternalError(String error);
     }
 
     public interface OutgoingInboxInterface {
-        void getOutgoingInboxData(String id, String email, List<Inbox> inboxes, List<User> users, List<String> count);
+        void getOutgoingInboxData(String id, String email, List<Inbox> inboxes, List<User> users);
         void onFirebaseInternalError(String error);
     }
 
@@ -186,29 +190,17 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
 
     public void getUserIncomingInboxData(){
         final List<Inbox> incomingList = new ArrayList<>();
-        final List<String> msg_count = new ArrayList<>();
         mDatabase.child("users").child(firebaseUser.getUid()).child("inbox").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (incomingList.size() > 0)
                     incomingList.clear();
-                if (msg_count.size() > 0)
-                    msg_count.clear();
-
-                for (DataSnapshot dataSnap : dataSnapshot.getChildren()){
-                    long count = 0;
-                    long msg_item = dataSnap.getChildrenCount();
-                    msg_count.add(String.valueOf(msg_item));
-                    for (DataSnapshot data : dataSnap.getChildren()){
-                        if (count == msg_item-1){
-                            Inbox msg = data.getValue(Inbox.class);
-                            incomingList.add(msg);
-                        }
-                        count++;
-                    }
+                for (DataSnapshot s : dataSnapshot.getChildren()){
+                    Inbox msg = s.getValue(Inbox.class);
+                    incomingList.add(msg);
                 }
-                incomingInboxInterface.getIncomingInboxData(userId, userPhone, incomingList, msg_count);
+                incomingInboxInterface.getIncomingInboxData(userId, userPhone, incomingList);
             }
 
             @Override
@@ -241,23 +233,15 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
                             for (DataSnapshot sn : snap.getChildren()){
                                 String userId = firebaseUser.getUid();
                                 if (sn.getKey().equals(userId)){
-                                    long count = 0;
-                                    long msg_item = sn.getChildrenCount();
-                                    msg_count.add(String.valueOf(msg_item));
-                                    for (DataSnapshot s : sn.getChildren()){
-                                        if (count == msg_item-1){
-                                            Inbox msg = s.getValue(Inbox.class);
-                                            outgoingList.add(msg);
-                                            outMsgList.add(user);
-                                        }
-                                        count++;
-                                    }
+                                    Inbox msg = sn.getValue(Inbox.class);
+                                    outgoingList.add(msg);
+                                    outMsgList.add(user);
                                 }
                             }
                         }
                     }
                 }
-                outgoingInboxInterface.getOutgoingInboxData(userId, userPhone, outgoingList, outMsgList, msg_count);
+                outgoingInboxInterface.getOutgoingInboxData(userId, userPhone, outgoingList, outMsgList);
             }
 
             @Override
@@ -267,15 +251,34 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
         });
     }
 
+    public void SendRequestMsgToUser(final String userId, final String SendNotificationId, final String name, final String blood){
+        mDatabase.child("users").child(userId).child("inbox").child(firebaseUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Inbox inbox = dataSnapshot.getValue(Inbox.class);
+                if (inbox != null){
+                    c = inbox.count;
+                    c++;
+                }
+                ActionToSendInboxData(c, userId, SendNotificationId, name, blood);
+            }
 
-    public void SendRequestMsgToUser(String userId, String SendNotificationId, String name, String blood){
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void ActionToSendInboxData(int count, String userId, String sendNotificationId, String name, String blood) {
         final String message = "Hi, I'm " + Config.CURRENT_USERNAME + ". I have just checked your profile, I need " + blood
                 + " blood urgent. If you are interested to donate, please contact with me";
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yy hh.mm aa", Locale.getDefault());
         String sendTime = dateFormat.format(new Date());
-        Inbox msg = new Inbox(message, sendTime, Config.CURRENT_USERNAME, userPhone);
-        mDatabase.child("users").child(userId).child("inbox").child(firebaseUser.getUid()).push().setValue(msg);
-        sendNotification(SendNotificationId,blood);
+        Inbox msg = new Inbox(message, sendTime, Config.CURRENT_USERNAME, userPhone, count);
+
+        mDatabase.child("users").child(userId).child("inbox").child(firebaseUser.getUid()).setValue(msg);
+        sendNotification(sendNotificationId,blood);
         Toast.makeText(context,
                 "Request message send to " + name,
                 Toast.LENGTH_SHORT).show();
@@ -307,18 +310,4 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
             }
         }
     }
-
-    private void sendMessage() {
-//
-//        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS)
-//                != PackageManager.PERMISSION_GRANTED) {
-//            //getPermissionToReadSMS();
-//        } else {
-//            SmsManager smsManager = SmsManager.getDefault();
-//            smsManager.sendTextMessage("+8801673260344", null, "Hello World", null, null);
-//            Toast.makeText(context, "Message sent!", Toast.LENGTH_SHORT).show();
-//        }
-
-    }
-
 }

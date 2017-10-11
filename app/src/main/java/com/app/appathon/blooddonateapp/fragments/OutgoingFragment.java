@@ -67,11 +67,14 @@ public class OutgoingFragment extends Fragment implements FirebaseDatabaseHelper
     }
 
     @Override
-    public void getOutgoingInboxData(String id, String email, List<Inbox> inboxes, List<User> users, List<String> count) {
+    public void getOutgoingInboxData(String id, String email, List<Inbox> inboxes, List<User> users) {
+        if (outgoingList.size()>0) {
+            outgoingList.clear();
+            outMsgList.clear();
+        }
         outMsgList.addAll(users);
         outgoingList.addAll(inboxes);
-        msg_count.addAll(count);
-        outgoingView.setAdapter(new OutgoingAdapter(outMsgList, outgoingList, getActivity(), msg_count));
+        outgoingView.setAdapter(new OutgoingAdapter(outMsgList, outgoingList, getActivity()));
     }
 
     @Override

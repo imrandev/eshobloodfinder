@@ -64,7 +64,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     private LatLng latLng;
     private EditText verifyCode,verifyPhone;
     private ImageButton sendCode;
-    String username;
+    private String username;
+    private MaterialDialog dialog;
     private static final String TAG = "SignUpActivity";
 
     @Override
@@ -148,6 +149,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 Log.d(TAG, "onCodeSent:" + verificationId);
                 mVerificationId = verificationId;
                 mResendToken = token;
+                verifyCode.setVisibility(View.VISIBLE);
+                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
             }
         };
     }
@@ -203,8 +206,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                     }
                 });
 
-        MaterialDialog dialog = builder.build();
+        dialog = builder.build();
         verifyCode = (EditText) dialog.findViewById(R.id.verify_code);
+        verifyCode.setVisibility(View.INVISIBLE);
+        dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
         verifyPhone = (EditText) dialog.findViewById(R.id.verify_phone);
         sendCode = (ImageButton) dialog.findViewById(R.id.btnSend);
         sendCode.setOnClickListener(new View.OnClickListener() {

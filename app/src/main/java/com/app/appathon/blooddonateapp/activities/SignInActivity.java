@@ -38,9 +38,11 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private EditText etEmail, etPwd;
     private FirebaseAuth mAuth;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
-    String mVerificationId;
+    private String mVerificationId;
     private EditText emailToPassVerify;
     private static final String TAG = "SignInActivity";
+    private Button btn_signIn;
+    private AppCompatImageButton btn_send;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +59,16 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         etEmail = (EditText)findViewById(R.id.sin_email);
         etPwd = (EditText)findViewById(R.id.sin_password);
-        Button btn_signIn = (Button) findViewById(R.id.btnSignIn);
-        AppCompatImageButton btn_send = (AppCompatImageButton) findViewById(R.id.btnSend);
+        btn_signIn = (Button) findViewById(R.id.btnSignIn);
+        btn_send = (AppCompatImageButton) findViewById(R.id.btnSend);
         TextView tv_signUp = (TextView) findViewById(R.id.tv_signUp);
 
         btn_signIn.setOnClickListener(this);
         btn_send.setOnClickListener(this);
         tv_signUp.setOnClickListener(this);
+
+        etPwd.setVisibility(View.INVISIBLE);
+        btn_signIn.setVisibility(View.INVISIBLE);
 
         mAuth = FirebaseAuth.getInstance();
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -89,6 +94,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                                    PhoneAuthProvider.ForceResendingToken token) {
                 Log.d(TAG, "onCodeSent:" + verificationId);
                 mVerificationId = verificationId;
+                etPwd.setVisibility(View.VISIBLE);
+                btn_signIn.setVisibility(View.VISIBLE);
             }
         };
     }

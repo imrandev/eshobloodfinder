@@ -30,30 +30,28 @@ public class OutgoingAdapter extends RecyclerView.Adapter<OutgoingAdapter.ViewHo
 
     private ArrayList<Inbox> inboxArrayList;
     private Activity activity;
-    private ArrayList<String> msg_count;
     private ArrayList<User> userArrayList;
 
-    public OutgoingAdapter(ArrayList<User> userArrayList, ArrayList<Inbox> inboxArrayList, Activity activity, ArrayList<String> msg_count) {
+    public OutgoingAdapter(ArrayList<User> userArrayList, ArrayList<Inbox> inboxArrayList, Activity activity) {
         this.inboxArrayList = inboxArrayList;
         this.activity = activity;
-        this.msg_count = msg_count;
         this.userArrayList = userArrayList;
     }
 
     @Override
-    public OutgoingAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_inbox, parent, false);
-        return new OutgoingAdapter.ViewHolder(rootView);
+        return new ViewHolder(rootView);
     }
 
     @Override
-    public void onBindViewHolder(final OutgoingAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         Typeface ThemeFont = Typeface.createFromAsset(activity.getAssets(), "fonts/HelveticaNeue.ttf");
 
         holder.sender_name.setText(userArrayList.get(position).getName());
         holder.msg_thumb.setText(String.valueOf(userArrayList.get(position).getName().charAt(0)));
         holder.msg_time.setText(inboxArrayList.get(position).getSendTime());
-        holder.msg_count.setText(String.valueOf(msg_count.get(position)));
+        holder.msg_count.setText(String.valueOf(inboxArrayList.get(position).getCount()));
         holder.msg_body.setText(inboxArrayList.get(position).getMessage());
 
         holder.op1.setText(R.string.rating);
