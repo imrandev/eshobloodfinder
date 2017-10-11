@@ -70,6 +70,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
         TextView signMe = (TextView) findViewById(R.id.sin_me);
+        TextView phnAuth = (TextView) findViewById(R.id.phn_auth);
+        phnAuth.setTypeface(ThemeFont);
         signMe.setTypeface(ThemeFont);
 
         progressBar = (ProgressBar) findViewById(R.id.marker_progress);
