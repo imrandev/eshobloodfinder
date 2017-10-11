@@ -20,6 +20,9 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -30,13 +33,21 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private InterstitialAd interstitialAd;
+    boolean exitApp = false;
     private EditText etEmail, etPwd;
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private String mVerificationId;
     private EditText emailToPassVerify;
@@ -56,6 +67,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         TextView signMe = (TextView) findViewById(R.id.sin_me);
         signMe.setTypeface(ThemeFont);
 
+        mDatabase= FirebaseDatabase.getInstance().getReference();
 
         etEmail = (EditText)findViewById(R.id.sin_email);
         etPwd = (EditText)findViewById(R.id.sin_password);
@@ -116,9 +128,30 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+
                             Log.d(TAG, "signInWithCredential:success");
-                            startActivity(new Intent(SignInActivity.this, MainActivity.class));
-                            finish();
+                            final FirebaseUser user = task.getResult().getUser();
+                            mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot data: dataSnapshot.getChildren()){
+                                        if (data.child(user.getUid()).exists()) {
+                                            launchInter();
+                                            loadInterstitial();
+                                            startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                                            finish();
+                                        } else {
+                                            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+                                            finish();
+                                        }
+                                    }
+                                }
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                         } else {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
@@ -227,4 +260,65 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     }
                 });
     }
+
+    public void launchInter(){
+        interstitialAd =new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getString(R.string.Interstitial));
+        //Set the adListener
+        interstitialAd.setAdListener(new AdListener() {
+
+            public void onAdLoaded() {
+                showAdInter();
+            }
+            public void onAdFailedToLoad(int errorCode) {
+                String message = String.format("onAdFailedToLoad(%s)", getErrorReason(errorCode));
+
+            }
+            @Override
+            public void onAdClosed() {
+                if (exitApp)
+                    finish();
+            }
+        });
+
+    }
+
+    private void showAdInter(){
+        if(interstitialAd.isLoaded()){
+            interstitialAd.show();
+        } else{
+            Log.d("", "ad was not ready to shown");
+        }
+    }
+
+    public void loadInterstitial(){
+        AdRequest adRequest= new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("INSERT_YOUR_HASH_DEVICE_ID")
+                .build();
+        //Load this Interstitial ad
+        interstitialAd.loadAd(adRequest);
+    }
+
+    //Get a string error
+    private String getErrorReason(int errorCode){
+
+        String errorReason="";
+        switch(errorCode){
+            case AdRequest.ERROR_CODE_INTERNAL_ERROR:
+                errorReason="Internal Error";
+                break;
+            case AdRequest.ERROR_CODE_INVALID_REQUEST:
+                errorReason="Invalid Request";
+                break;
+            case AdRequest.ERROR_CODE_NETWORK_ERROR:
+                errorReason="Network Error";
+                break;
+            case AdRequest.ERROR_CODE_NO_FILL:
+                errorReason="No Fill";
+                break;
+        }
+        return errorReason;
+    }
+
 }

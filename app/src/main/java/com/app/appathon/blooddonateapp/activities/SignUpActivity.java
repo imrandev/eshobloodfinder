@@ -125,34 +125,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         btn_signUp.setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
-        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-            @Override
-            public void onVerificationCompleted(PhoneAuthCredential credential) {
-                Log.d(TAG, "onVerificationCompleted:" + credential);
-                signInWithPhoneAuthCredential(credential);
-            }
-
-            @Override
-            public void onVerificationFailed(FirebaseException e) {
-                Log.w(TAG, "onVerificationFailed", e);
-                if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    verifyPhone.setError("Invalid phone number.");
-                } else if (e instanceof FirebaseTooManyRequestsException) {
-                    Snackbar.make(findViewById(android.R.id.content), "Quota exceeded.",
-                            Snackbar.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCodeSent(String verificationId,
-                                   PhoneAuthProvider.ForceResendingToken token) {
-                Log.d(TAG, "onCodeSent:" + verificationId);
-                mVerificationId = verificationId;
-                mResendToken = token;
-                verifyCode.setVisibility(View.VISIBLE);
-                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-            }
-        };
     }
 
     @Override
@@ -167,6 +139,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this, SignInActivity.class));
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
         finish();
@@ -177,7 +150,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()) {
             case R.id.btn_signUp:
                 if (validateForm()){
-                    userSignUp();
+                    onAuthSuccess();
                 }
                 break;
             default:
@@ -185,80 +158,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    private void userSignUp() {
-
-        MaterialDialog.Builder builder  = new MaterialDialog.Builder(this)
-                .title("Phone Verification")
-                .customView(R.layout.dialog_code, true)
-                .backgroundColor(Color.parseColor("#4D4D4D"))
-                .titleColorRes(android.R.color.white)
-                .positiveText("Submit")
-                .canceledOnTouchOutside(false)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        String code = verifyCode.getText().toString();
-                        if (TextUtils.isEmpty(code)) {
-                            verifyCode.setError("Cannot be empty.");
-                            return;
-                        }
-                        verifyPhoneNumberWithCode(mVerificationId, code);
-                    }
-                });
-
-        dialog = builder.build();
-        verifyCode = (EditText) dialog.findViewById(R.id.verify_code);
-        verifyCode.setVisibility(View.INVISIBLE);
-        dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-        verifyPhone = (EditText) dialog.findViewById(R.id.verify_phone);
-        sendCode = (ImageButton) dialog.findViewById(R.id.btnSend);
-        sendCode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!validatePhoneNumber()) {
-                    return;
-                }
-                startPhoneNumberVerification(verifyPhone.getText().toString());
-            }
-        });
-        dialog.show();
-    }
-
-    private void startPhoneNumberVerification(String phoneNumber) {
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phoneNumber,        // Phone number to verify
-                60,                 // Timeout duration
-                TimeUnit.SECONDS,   // Unit of timeout
-                this,               // Activity (for callback binding)
-                mCallbacks);        // OnVerificationStateChangedCallbacks
-    }
-
-
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = task.getResult().getUser();
-                            onAuthSuccess(user);
-                        } else {
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                verifyCode.setError("Invalid code.");
-                            }
-                        }
-                    }
-                });
-    }
-
-    private void verifyPhoneNumberWithCode(String verificationId, String code) {
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-        signInWithPhoneAuthCredential(credential);
-    }
-
-    private void onAuthSuccess(FirebaseUser user) {
+    private void onAuthSuccess() {
         String email = etEmail.getText().toString();
         if(!TextUtils.isEmpty(email)){
             username = usernameFromEmail(email);
@@ -271,8 +171,15 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
         int dDate = materialSpinner.getSelectedIndex();
         String gender = genderSpinner.getItems().get(genderSpinner.getSelectedIndex()).toString();
+
+        String uId="";
+        String phone="";
+        if(mAuth!=null){
+            uId = mAuth.getCurrentUser().getUid();
+            phone = mAuth.getCurrentUser().getPhoneNumber();
+        }
         //write new user
-        writeNewUser(user.getUid(), username, name, email, gender, user.getPhoneNumber(), area, bldGrp, dDate);
+        writeNewUser(uId, username, name, email, gender, phone, area, bldGrp, dDate);
 
         //Go to MainActivity
         startActivity(new Intent(this, MainActivity.class));
@@ -319,15 +226,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 //        }
 
         return result;
-    }
-
-    private boolean validatePhoneNumber() {
-        String phoneNumber = verifyPhone.getText().toString();
-        if (TextUtils.isEmpty(phoneNumber)) {
-            verifyPhone.setError("Invalid phone number.");
-            return false;
-        }
-        return true;
     }
 
     public LatLng getLocationFromAddress(String strAddress) {
