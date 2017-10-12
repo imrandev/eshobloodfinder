@@ -20,6 +20,7 @@ import com.app.appathon.blooddonateapp.Config.Config;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.app.appathon.blooddonateapp.model.User;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -51,11 +52,14 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
     private SearchView searchView;
     public FragmentCommunicator fragmentCommunicator;
     public int someIntValue =1;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Handle Toolbar
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
