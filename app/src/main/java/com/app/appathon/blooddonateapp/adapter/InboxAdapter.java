@@ -50,9 +50,6 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.msg_body.setText(inboxArrayList.get(position).getMessage());
 
         holder.op1.setText(R.string.accept);
-        holder.op2.setText(R.string.profile);
-
-        final String phone = inboxArrayList.get(holder.getAdapterPosition()).getSenderPhone();
 
         holder.op1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,12 +61,6 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         holder.msg_body.setTypeface(ThemeFont);
         holder.msg_time.setTypeface(ThemeFont);
 
-        holder.op2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
     }
 
 
@@ -87,7 +78,6 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
         private TextView msg_count;
         private CardView cardView;
         private TextView op1;
-        private TextView op2;
         private ActionCallToUser callToUser;
 
         ViewHolder(View itemView, ActionCallToUser callToUser) {
@@ -99,7 +89,6 @@ public class InboxAdapter extends RecyclerView.Adapter<InboxAdapter.ViewHolder> 
             msg_time = (TextView) itemView.findViewById(R.id.sending_time);
             msg_count = (TextView) itemView.findViewById(R.id.msg_count);
             op1 = (TextView) itemView.findViewById(R.id.op1);
-            op2 = (TextView) itemView.findViewById(R.id.op2);
             cardView = (CardView) itemView.findViewById(R.id.inbox_card);
         }
 
