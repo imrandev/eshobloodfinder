@@ -351,9 +351,9 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void goToUserProfile(int position){
-        String email = userArrayList.get(position).email;
+        String id = userArrayList.get(position).getId();
         Intent intent = new Intent(NearbyDonorActivity.this, UserProfileActivity.class);
-        intent.putExtra("email", email);
+        intent.putExtra("id", id);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
     }
