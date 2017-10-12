@@ -1,14 +1,11 @@
 package com.app.appathon.blooddonateapp.adapter;
 
 import android.app.Activity;
-
-import java.util.Iterator;
 import java.util.List;
 
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;

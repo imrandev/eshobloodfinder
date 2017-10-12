@@ -12,10 +12,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.ArraySet;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
@@ -27,7 +25,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +32,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.MainActivity;
-import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
 import com.app.appathon.blooddonateapp.adapter.AvailableAdapter;
 import com.app.appathon.blooddonateapp.app.BloodApplication;
 import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
@@ -48,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.AvailableDonorInterface,
         ConnectivityReceiver.ConnectivityReceiverListener, MainActivity.FragmentCommunicator {

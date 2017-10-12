@@ -22,13 +22,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.app.BloodApplication;
 import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
 import com.app.appathon.blooddonateapp.helper.ConnectivityReceiver;
-import com.app.appathon.blooddonateapp.interfaces.TrackUserLocation;
 import com.app.appathon.blooddonateapp.model.User;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,13 +37,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +57,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         OnLocationUpdatedListener, OnActivityUpdatedListener, OnGeofencingTransitionListener {
 
     private View snackView;
-    private boolean isConnected, isGpsEnabled;
     private GoogleMap gMap;
     private ArrayList<User> userArrayList = new ArrayList<>();
     private LocationGooglePlayServicesProvider provider;
@@ -92,9 +83,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        isConnected = ConnectivityReceiver.isConnected();
-        isGpsEnabled = ConnectivityReceiver.isGPSConnected();
         snackView = findViewById(R.id.mapFragment);
 
         if (gMap == null) {
@@ -292,6 +280,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         if (!userArrayList.isEmpty()) {
             for (int i = 0; i < userArrayList.size(); i++) {
                 String blood = userArrayList.get(i).getBloodGroup();
+                String uId = userArrayList.get(i).getId();
                 String userName = userArrayList.get(i).getName();
                 String donateDate = String.valueOf(userArrayList.get(i).getLastDonate());
 
@@ -333,6 +322,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                     }
                 });
                 Marker marker = gMap.addMarker(markerOption);
+                marker.setTag(uId);
                 marker.showInfoWindow();
             }
         } else {
@@ -342,18 +332,17 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        int position = Integer.parseInt(marker.getId().replace("m", ""));
+        String uid = String.valueOf(marker.getTag());
         try {
-            goToUserProfile(position);
+            goToUserProfile(uid);
         } catch (ArrayIndexOutOfBoundsException ex) {
             showSnackMessage(ex.getMessage());
         }
     }
 
-    private void goToUserProfile(int position){
-        String id = userArrayList.get(position).getId();
+    private void goToUserProfile(String uID){
         Intent intent = new Intent(NearbyDonorActivity.this, UserProfileActivity.class);
-        intent.putExtra("id", id);
+        intent.putExtra("id", uID);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
     }

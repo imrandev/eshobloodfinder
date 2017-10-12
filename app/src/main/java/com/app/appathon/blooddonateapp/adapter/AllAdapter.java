@@ -3,38 +3,18 @@ package com.app.appathon.blooddonateapp.adapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.app.appathon.blooddonateapp.Config.Config;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
-import com.app.appathon.blooddonateapp.model.Inbox;
 import com.app.appathon.blooddonateapp.model.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
 
 /**
  * Created by IMRAN on 10/22/2016.

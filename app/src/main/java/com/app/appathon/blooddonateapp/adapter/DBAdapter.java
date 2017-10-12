@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * Created by Sunny on 10/15/2016.
+ * Created by T_D on 10/15/2016.
  */
 
 public class DBAdapter {

@@ -19,18 +19,10 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.R;
-import com.app.appathon.blooddonateapp.activities.InboxActivity;
 import com.app.appathon.blooddonateapp.adapter.InboxAdapter;
 import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
 import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
 import com.app.appathon.blooddonateapp.model.Inbox;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
