@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
         MaterialDialog.Builder bulder = new MaterialDialog.Builder(this)
                 .title(R.string.app_name)
                 .customView(R.layout.about, true)
-                .backgroundColor(getResources().getColor(R.color.colorPrimary))
+                .backgroundColor(getResources().getColor(R.color.dialog_color))
                 .titleColorRes(android.R.color.white)
                 .positiveText("MORE APPS")
                 .icon(getResources().getDrawable(R.mipmap.ic_launcher))
