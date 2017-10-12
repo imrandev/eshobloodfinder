@@ -333,11 +333,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onInfoWindowClick(Marker marker) {
         String uid = String.valueOf(marker.getTag());
-        try {
-            goToUserProfile(uid);
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            showSnackMessage(ex.getMessage());
-        }
+        goToUserProfile(uid);
     }
 
     private void goToUserProfile(String uID){
