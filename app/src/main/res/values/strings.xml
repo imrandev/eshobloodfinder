@@ -4,6 +4,10 @@
     <string name="banner_ad_unit_id">ca-app-pub-6348813731309248/8964399384</string>
     <string name="Interstitial">ca-app-pub-6348813731309248/4758874148</string>
 
+    <string name="nerdgeeks_developer">© NerdGeeks Developer</string>
+    <string name="version_name">Version Name : 1.0</string>
+    <string name="version_code">Version Code : 1</string>
+
     <!--Popup Strings-->
     <string name="menu_all">Dhaka</string>
     <string name="menu_ap">Chittagong</string>

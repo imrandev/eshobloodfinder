@@ -33,7 +33,7 @@ public class SplashActivity extends Activity {
 
         myPref = getApplicationContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
 
-        int SPLASH_DISPLAY_LENGTH = 700;
+        int SPLASH_DISPLAY_LENGTH = 2000;
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

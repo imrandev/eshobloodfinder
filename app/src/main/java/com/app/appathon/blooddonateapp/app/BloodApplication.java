@@ -32,7 +32,7 @@ public class BloodApplication extends Application {
         scoresRef.keepSynced(true);
 
         OneSignal.startInit(this)
-                .autoPromptLocation(true) // default call promptLocation later
+                .autoPromptLocation(false) // default call promptLocation later
                 .setNotificationReceivedHandler(new NotificationReceivedHandler())
                 .setNotificationOpenedHandler(new NotificationOpenedHandler())
                 .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)

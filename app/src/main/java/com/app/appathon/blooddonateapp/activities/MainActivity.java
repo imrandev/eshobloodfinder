@@ -1,11 +1,14 @@
 package com.app.appathon.blooddonateapp.activities;
 
 import android.app.SearchManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.app.appathon.blooddonateapp.BuildConfig;
 import com.app.appathon.blooddonateapp.Config.Config;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
@@ -188,6 +194,12 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
                 return true;
             case R.id.menu_search:
                 return true;
+            case R.id.rate:
+                rateMyApp();
+                return true;
+            case R.id.about:
+                aboutMyApp();
+                return true;
             default:
                 return false;
         }
@@ -227,4 +239,54 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
     public interface FragmentCommunicator {
         void passDataToFragment(String value);
     }
+
+    private void aboutMyApp() {
+        MaterialDialog.Builder bulder = new MaterialDialog.Builder(this)
+                .title(R.string.app_name)
+                .customView(R.layout.about, true)
+                .backgroundColor(getResources().getColor(R.color.colorPrimary))
+                .titleColorRes(android.R.color.white)
+                .positiveText("MORE APPS")
+                .icon(getResources().getDrawable(R.mipmap.ic_launcher))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        Uri uri = Uri.parse("market://search?q=pub:" + "NerdGeeks");
+                        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                        try {
+                            startActivity(goToMarket);
+                        } catch (ActivityNotFoundException e) {
+                            startActivity(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("http://play.google.com/store/search?q=pub:" + "NerdGeeks")));
+                        }
+                    }
+                });
+
+        MaterialDialog materialDialog = bulder.build();
+
+        TextView versionCode = (TextView) materialDialog.findViewById(R.id.version_code);
+        TextView versionName = (TextView) materialDialog.findViewById(R.id.version_name);
+        versionCode.setText(String.valueOf("vCode : " + BuildConfig.VERSION_CODE));
+        versionName.setText("vName : " + BuildConfig.VERSION_NAME);
+
+        materialDialog.show();
+    }
+
+    private void rateMyApp() {
+        Uri uri = Uri.parse("market://details?id=" + getApplicationContext().getPackageName());
+        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET |
+                Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        try {
+            startActivity(goToMarket);
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
+        }
+    }
+
+
 }
