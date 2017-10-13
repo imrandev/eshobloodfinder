@@ -30,4 +30,13 @@
         android:layout_height="match_parent"
         />
 
+    <ProgressBar
+        android:indeterminate="true"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:id="@+id/marker_progress"
+        style="?android:attr/progressBarStyle"
+        android:layout_height="50dp"
+        android:layout_width="50dp"/>
+
 </android.support.design.widget.CoordinatorLayout>

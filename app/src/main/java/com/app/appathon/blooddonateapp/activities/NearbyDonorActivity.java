@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.app.BloodApplication;
@@ -66,6 +67,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private String userId;
     private String SUBMIT_PRESSED = "OPEN";
     private FirebaseDatabaseHelper databaseHelper;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +81,8 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         // Handle Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        progressBar = (ProgressBar) findViewById(R.id.marker_progress);
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -147,6 +151,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     private void startLocation() {
 
+        progressBar.setVisibility(View.VISIBLE);
         provider = new LocationGooglePlayServicesProvider();
         provider.setCheckLocationSettings(true);
         SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
@@ -157,6 +162,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private void showLast() {
         Location lastLocation = SmartLocation.with(this).location().getLastLocation();
         if (lastLocation != null) {
+            progressBar.setVisibility(View.VISIBLE);
             getMapData(gMap, new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
         }
 
@@ -333,6 +339,8 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 Marker marker = gMap.addMarker(markerOption);
                 marker.setTag(uId);
                 marker.showInfoWindow();
+
+                progressBar.setVisibility(View.INVISIBLE);
             }
         } else {
 
