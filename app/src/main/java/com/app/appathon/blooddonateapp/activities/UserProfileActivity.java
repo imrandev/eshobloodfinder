@@ -67,7 +67,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         uId = intent.getStringExtra("id");
 
         //Initializing Firebase Database Reference
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
         //Initializing layout components

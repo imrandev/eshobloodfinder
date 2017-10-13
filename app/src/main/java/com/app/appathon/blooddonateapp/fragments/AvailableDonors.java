@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.internal.MDButton;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.MainActivity;
 import com.app.appathon.blooddonateapp.adapter.AvailableAdapter;
@@ -38,7 +39,13 @@ import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
 import com.app.appathon.blooddonateapp.helper.ConnectivityReceiver;
 import com.app.appathon.blooddonateapp.helper.SimpleDividerItemDecoration;
 import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
+import com.app.appathon.blooddonateapp.model.ProfileSecurity;
 import com.app.appathon.blooddonateapp.model.User;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +53,8 @@ import java.util.List;
 
 
 public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.AvailableDonorInterface,
-        ConnectivityReceiver.ConnectivityReceiverListener, MainActivity.FragmentCommunicator {
+        ConnectivityReceiver.ConnectivityReceiverListener,
+        MainActivity.FragmentCommunicator{
 
     private FloatingActionButton mFabButton;
     private RecyclerView recyclerView;
@@ -371,33 +379,66 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
     private ActionCallToUser onItemCallToUser = new ActionCallToUser() {
         @Override
         public void onCall(View v, int position) {
-            phone = userArrayList.get(position).getPhone();
-            new MaterialDialog.Builder(getContext())
-                    .title(phone)
-                    .icon(ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_round))
-                    .positiveText("Call")
-                    .backgroundColorRes(R.color.dialog_color)
-                    .titleColorRes(android.R.color.white)
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            try {
-                                Intent phoneIntent = new Intent(Intent.ACTION_CALL);
-                                phoneIntent.setData(Uri.parse("tel:" + phone));
-                                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                    requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-                                } else {
-                                    startActivity(phoneIntent);
-                                }
-                            } catch (android.content.ActivityNotFoundException | SecurityException ex) {
-                                Toast.makeText(getContext(),
-                                        "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
-                            }
+            final int pos = position;
+            String id = userArrayList.get(position).getId();
+            DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+            mDatabase.child("users").child(id).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChild("security")) {
+                        DataSnapshot data = dataSnapshot.child("security");
+                        boolean isHidden = Boolean.parseBoolean(data.child("phoneHidden").getValue().toString());
+                        if (isHidden) {
+                            phone = "Number is in hidden mode";
+                            dialogView(phone, false);
+                        } else {
+                            phone = userArrayList.get(pos).getPhone();
+                            dialogView(phone, true);
                         }
-                    })
-                    .show();
+                    } else {
+                        phone = userArrayList.get(pos).getPhone();
+                        dialogView(phone, true);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     };
+
+    private void dialogView(final String phone, boolean b) {
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
+                .title(phone)
+                .icon(ContextCompat.getDrawable(getContext(), R.drawable.ic_phone_round))
+                .positiveText("Call")
+                .backgroundColorRes(R.color.dialog_color)
+                .titleColorRes(android.R.color.white)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        try {
+                            Intent phoneIntent = new Intent(Intent.ACTION_CALL);
+                            phoneIntent.setData(Uri.parse("tel:" + phone));
+                            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
+                            } else {
+                                startActivity(phoneIntent);
+                            }
+                        } catch (android.content.ActivityNotFoundException | SecurityException ex) {
+                            Toast.makeText(getContext(),
+                                    "Call failed, please try again later!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+        MaterialDialog dialog = builder.build();
+        MDButton positiveButton = dialog.getActionButton(DialogAction.POSITIVE);
+        positiveButton.setEnabled(b);
+        dialog.show();
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,

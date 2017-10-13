@@ -291,8 +291,17 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                         + " month(s) ago"
                 );
 
-                LatLng latLng = new LatLng(userArrayList.get(i).getLat(), userArrayList.get(i).getLng());
-                markerOption.position(latLng);
+                double lat = userArrayList.get(i).getLat();
+                double lng = userArrayList.get(i).getLng();
+
+                if (lat > 0){
+                    LatLng latLng = new LatLng(lat,lng);
+                    markerOption.position(latLng);
+                } else {
+                    String add = userArrayList.get(i).getAddress();
+                    markerOption.position(getLocationFromAddress(add));
+                }
+
                 markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
                 markerOption.title(userName);
 

@@ -7,6 +7,7 @@ import android.widget.Toast;
 import com.app.appathon.blooddonateapp.Config.Config;
 import com.app.appathon.blooddonateapp.interfaces.TrackUserLocation;
 import com.app.appathon.blooddonateapp.model.Inbox;
+import com.app.appathon.blooddonateapp.model.ProfileSecurity;
 import com.app.appathon.blooddonateapp.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,6 +42,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
     private AllDonorInterface allDonorInterface;
     private IncomingInboxInterface incomingInboxInterface;
     private OutgoingInboxInterface outgoingInboxInterface;
+    private FirebaseUserPhoneSecurity userPhoneSecurity;
     private DatabaseReference mDatabase;
     private FirebaseUser firebaseUser;
     private String userId, userPhone;
@@ -72,6 +74,12 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
 
     public FirebaseDatabaseHelper(Activity context, RequestToUser requestToUser) {
         this.context = context;
+        initFirebase();
+    }
+
+    public FirebaseDatabaseHelper(Activity context, FirebaseUserPhoneSecurity userPhoneSecurity) {
+        this.context = context;
+        this.userPhoneSecurity = userPhoneSecurity;
         initFirebase();
     }
 
@@ -116,6 +124,10 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
 
     public interface RequestToUser {
         void SendRequestMsgToUser(String userId, String email, String name, String blood);
+    }
+
+    public interface FirebaseUserPhoneSecurity {
+        void checkPhoneSecurity(boolean isHidden);
     }
 
     public void getAvailableUserListData(){
@@ -168,8 +180,10 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (allUserList.size() > 0)
                     allUserList.clear();
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     User user = snapshot.getValue(User.class);
+                    assert user != null;
                     user.setId(snapshot.getKey());
                     if (!firebaseUser.getUid().equals(snapshot.getKey())){
                         allUserList.add(user);
@@ -307,5 +321,9 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
                 e.printStackTrace();
             }
         }
+    }
+
+    public void getPhoneSecurityData(){
+
     }
 }
