@@ -12,10 +12,18 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.app.appathon.blooddonateapp.R;
+import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SplashActivity extends Activity {
 
-    SharedPreferences myPref;
+    private FirebaseAuth mAuth;
+    DatabaseReference firebaseDatabase;
+
+    private InterstitialAdsHelper interAds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,25 +39,33 @@ public class SplashActivity extends Activity {
         mSplashText.startAnimation(splashAnimText);
         mSplashImage.startAnimation(splashAnimImage);
 
-        myPref = getApplicationContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
+        firebaseDatabase= FirebaseDatabase.getInstance().getReference();
+
+        interAds=new InterstitialAdsHelper(this);
 
         int SPLASH_DISPLAY_LENGTH = 2000;
         new Handler().postDelayed(new Runnable() {
             @Override
+
             public void run() {
 
-                if(myPref.getInt("CheckLog", 0)==0){
-                    startActivity(new Intent(SplashActivity.this, SignInActivity.class));
+                final FirebaseUser user = mAuth.getCurrentUser();
+                // Check auth on Activity start
+                if (user != null) {
+
+                    interAds.launchInter();
+                    interAds.loadInterstitial();
+
+                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
                     overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
                     finish();
-                }
-                else{
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                } else {
+                    startActivity(new Intent(SplashActivity.this, SignInActivity.class));
                     overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
                     finish();
                 }
             }
         }, SPLASH_DISPLAY_LENGTH);
     }
-
 }

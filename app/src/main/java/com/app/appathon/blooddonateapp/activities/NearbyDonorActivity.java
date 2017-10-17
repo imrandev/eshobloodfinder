@@ -305,7 +305,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                     markerOption.position(latLng);
                 } else {
                     String add = userArrayList.get(i).getAddress();
-                    markerOption.position(getLocationFromAddress(add));
+                   markerOption.position(getLocationFromAddress(add));
                 }
 
                 markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));

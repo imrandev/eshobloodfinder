@@ -18,9 +18,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.app.appathon.blooddonateapp.R;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
+import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -41,11 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private InterstitialAd interstitialAd;
-    boolean exitApp = false;
     private EditText etPhone, etPwd;
-    private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    FirebaseAuth mAuth;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
     private String mVerificationId;
     private static final String TAG = "SignInActivity";
@@ -53,6 +49,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private AppCompatImageButton btn_send;
     private ProgressBar progressBar;
     private TextInputLayout textInputLayout;
+    private InterstitialAdsHelper interAds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +67,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
         progressBar = (ProgressBar) findViewById(R.id.marker_progress);
 
+        interAds = new InterstitialAdsHelper(this);
+
         mDatabase= FirebaseDatabase.getInstance().getReference();
 
         etPhone = (EditText)findViewById(R.id.sin_email);
@@ -82,8 +81,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         btn_send.setOnClickListener(this);
 
         btn_signIn.setVisibility(View.INVISIBLE);
-
-        mAuth = FirebaseAuth.getInstance();
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential credential) {
@@ -124,12 +121,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        mAuth = FirebaseAuth.getInstance();
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-
                             Log.d(TAG, "signInWithCredential:success");
                             final FirebaseUser user = task.getResult().getUser();
                             mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -138,8 +135,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                                     for(DataSnapshot data: dataSnapshot.getChildren()){
                                         if (data.child(user.getUid()).child("id").exists()) {
                                             progressBar.setVisibility(View.INVISIBLE);
-                                            launchInter();
-                                            loadInterstitial();
+                                            interAds.launchInter();
+                                            interAds.loadInterstitial();
                                             startActivity(new Intent(SignInActivity.this, MainActivity.class));
                                             finish();
                                         } else {
@@ -171,19 +168,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        // Check auth on Activity start
-        if (mAuth.getCurrentUser() != null) {
-            //Go to MainActivity
-            launchInter();
-            loadInterstitial();
-            startActivity(new Intent(SignInActivity.this, MainActivity.class));
-            finish();
-        }
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btnSignIn :
@@ -200,72 +184,20 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     etPhone.setError("Cannot be empty.");
                     return;
                 }
+                if (phoneNm.length()<10) {
+                    etPhone.setError("Invalid Phone Number");
+                    return;
+                }
+                if(!phoneNm.startsWith("1")){
+                    etPhone.setError("Phone Number start from 1");
+                    return;
+                }
                 progressBar.setVisibility(View.VISIBLE);
-                startPhoneNumberVerification(phoneNm);
+                startPhoneNumberVerification("+880"+phoneNm);
                 break;
             default:
                 break;
         }
-    }
-
-    public void launchInter(){
-        interstitialAd =new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.Interstitial));
-        //Set the adListener
-        interstitialAd.setAdListener(new AdListener() {
-
-            public void onAdLoaded() {
-                showAdInter();
-            }
-            public void onAdFailedToLoad(int errorCode) {
-                String message = String.format("onAdFailedToLoad(%s)", getErrorReason(errorCode));
-
-            }
-            @Override
-            public void onAdClosed() {
-                if (exitApp)
-                    finish();
-            }
-        });
-
-    }
-
-    private void showAdInter(){
-        if(interstitialAd.isLoaded()){
-            interstitialAd.show();
-        } else{
-            Log.d("", "ad was not ready to shown");
-        }
-    }
-
-    public void loadInterstitial(){
-        AdRequest adRequest= new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("INSERT_YOUR_HASH_DEVICE_ID")
-                .build();
-        //Load this Interstitial ad
-        interstitialAd.loadAd(adRequest);
-    }
-
-    //Get a string error
-    private String getErrorReason(int errorCode){
-
-        String errorReason="";
-        switch(errorCode){
-            case AdRequest.ERROR_CODE_INTERNAL_ERROR:
-                errorReason="Internal Error";
-                break;
-            case AdRequest.ERROR_CODE_INVALID_REQUEST:
-                errorReason="Invalid Request";
-                break;
-            case AdRequest.ERROR_CODE_NETWORK_ERROR:
-                errorReason="Network Error";
-                break;
-            case AdRequest.ERROR_CODE_NO_FILL:
-                errorReason="No Fill";
-                break;
-        }
-        return errorReason;
     }
 
 }

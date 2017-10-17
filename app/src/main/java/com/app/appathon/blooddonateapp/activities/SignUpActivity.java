@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.PlacesAutoCompleteAdapter;
+import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
 import com.app.appathon.blooddonateapp.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +32,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     private MaterialSpinner materialSpinner, genderSpinner;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
+
+    private InterstitialAdsHelper interAdsActivity;
 
     private ArrayList<Integer> month = new ArrayList<>();
     private ArrayList<String> gender = new ArrayList<>();
@@ -48,6 +51,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
+
+        interAdsActivity = new InterstitialAdsHelper(this);
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -111,6 +116,12 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         startActivity(new Intent(this, SignInActivity.class));
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
         finish();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().signOut();
     }
 
     @Override
