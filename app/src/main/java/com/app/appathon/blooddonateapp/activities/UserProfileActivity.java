@@ -31,7 +31,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener,
         ValueEventListener, FirebaseDatabaseHelper.RequestToUser {
@@ -45,6 +50,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private FloatingActionButton buttonCall;
 
     private static final int REQUEST_PHONE_CALL = 1;
+    private int user_donate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,7 +194,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 bloodGroup = user.getBloodGroup();
                 bloodView.setText(bloodGroup);
                 //get user last donate date
-                donateView.setText(String.valueOf(user.getLastDonate()));
+                try {
+                    user_donate = differenceBetweenDates(user.getLastDonate());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                donateView.setText(String.valueOf(user_donate));
                 //user gender
                 gender = user.getGender();
                 genderView.setText(gender);
@@ -210,6 +221,17 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 
     @Override

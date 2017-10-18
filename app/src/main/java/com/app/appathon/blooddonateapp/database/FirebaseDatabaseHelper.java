@@ -22,6 +22,7 @@ import com.onesignal.OneSignal;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -140,25 +141,19 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     User user = snapshot.getValue(User.class);
                     user.setId(snapshot.getKey());
-                    Calendar c = Calendar.getInstance();
                     if (!firebaseUser.getUid().equals(snapshot.getKey())){
-                        int curMonth = c.get(Calendar.MONTH)+1;
-                        int donateDATE = user.lastDonate;
-
-                        if(donateDATE==0){
-                            availableUserList.add(user);
-                        }
-                        else if(curMonth>donateDATE){
-                            int interValTime = curMonth - donateDATE;
-                            int lastDonated = curMonth - interValTime;
-                            if(lastDonated > 3){
+                        String date = user.lastDonate;
+                        try {
+                            if(date.compareTo("0")==0){
                                 availableUserList.add(user);
+                            } else {
+                                int donateDATE = differenceBetweenDates(date);
+                                if(donateDATE>3){
+                                    availableUserList.add(user);
+                                }
                             }
-                        } else if(donateDATE>curMonth){
-                            int interValTime = (donateDATE + curMonth + 2) - donateDATE;
-                            if(interValTime > 3){
-                                availableUserList.add(user);
-                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -198,6 +193,17 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
                 allDonorInterface.onFirebaseInternalError(databaseError.getMessage());
             }
         });
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 
     public void getUserIncomingInboxData(){

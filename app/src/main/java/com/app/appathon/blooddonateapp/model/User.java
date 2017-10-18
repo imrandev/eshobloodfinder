@@ -14,7 +14,7 @@ public class User {
     public String phone;
     public String address;
     public String bloodGroup;
-    public int lastDonate;
+    public String lastDonate;
     public String gender;
     public double lat;
     public double lng;
@@ -24,7 +24,7 @@ public class User {
     }
 
     public User(String id, String username, String name, String email, String phone, String address,
-                String bloodGroup, int lastDonate, String gender, double lat, double lng, String sendNotification) {
+                String bloodGroup, String lastDonate, String gender, double lat, double lng, String sendNotification) {
         this.id = id;
         this.username = username;
         this.lat = lat;
@@ -123,11 +123,11 @@ public class User {
         this.bloodGroup = bloodGroup;
     }
 
-    public int getLastDonate() {
+    public String getLastDonate() {
         return lastDonate;
     }
 
-    public void setLastDonate(int lastDonate) {
+    public void setLastDonate(String lastDonate) {
         this.lastDonate = lastDonate;
     }
 }

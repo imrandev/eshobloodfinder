@@ -33,7 +33,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class ProfileActivity extends AppCompatActivity implements ValueEventListener {
 
@@ -141,7 +145,11 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
             User user = snapshot.getValue(User.class);
             if (snapshot.getKey().equals(firebaseUser.getUid())){
                 user_phone = user.getPhone();
-                user_donate = user.getLastDonate();
+                try {
+                    user_donate = differenceBetweenDates(user.getLastDonate());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 user_area = user.getAddress();
                 name.setText(user.getName());
                 email.setText(user.getEmail());
@@ -162,6 +170,17 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
                 }
             }
         }
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 
     @Override

@@ -135,7 +135,6 @@
                 </LinearLayout>
 
                 <!-- Blood Type -->
-
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
@@ -214,52 +213,40 @@
 
                 <!-- Last Donate Type -->
                 <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="55dp"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/custom_edittext_bg"
-                    android:orientation="horizontal"
-                    android:weightSum="5">
+                    android:weightSum="4">
 
                     <ImageView
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:layout_margin="2dp"
-                        android:layout_weight="4"
+                        android:layout_weight=".8"
                         android:src="@drawable/ic_timer" />
 
-                    <TextView
-                        android:background="@drawable/custom_edittext_bg"
-                        android:layout_width="wrap_content"
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:padding="5dp"
-                        android:text="Last\nDonated"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@android:color/white" />
+                        android:layout_weight="3.2"
+                        android:background="@drawable/custom_edittext_bg">
 
-                    <com.jaredrummler.materialspinner.MaterialSpinner
-                        android:id="@+id/donateDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:layout_weight="1"
-                        app:ms_arrow_tint="@android:color/white"
-                        app:ms_background_color="@color/colorPrimaryDark"
-                        app:ms_text_color="@android:color/white" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.5"
-                        android:gravity="center"
-                        android:text="month(s)\nago"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                        android:textColor="@android:color/white" />
-
+                        <EditText
+                            android:id="@+id/donateDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:background="@android:color/transparent"
+                            android:hint="Last Donate"
+                            android:inputType="date"
+                            android:padding="5dp"
+                            android:drawableEnd="@drawable/ic_date_range"
+                            android:drawableRight="@drawable/ic_date_range"
+                            android:textColor="@android:color/white" />
+                    </android.support.design.widget.TextInputLayout>
                 </LinearLayout>
 
                 <!-- Area -->
@@ -300,18 +287,5 @@
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/btn_signUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:src="@drawable/btn_add"
-            android:textColor="@android:color/white"
-            app:backgroundTint="#FF7043"
-            app:elevation="8dp"
-            app:fabSize="normal" />
-
     </android.support.design.widget.CoordinatorLayout>
 </android.support.v7.widget.CardView>

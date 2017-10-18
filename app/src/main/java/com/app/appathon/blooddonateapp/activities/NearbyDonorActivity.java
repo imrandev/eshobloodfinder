@@ -151,7 +151,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     private void startLocation() {
 
-        progressBar.setVisibility(View.VISIBLE);
         provider = new LocationGooglePlayServicesProvider();
         provider.setCheckLocationSettings(true);
         SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
@@ -162,7 +161,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private void showLast() {
         Location lastLocation = SmartLocation.with(this).location().getLastLocation();
         if (lastLocation != null) {
-            progressBar.setVisibility(View.VISIBLE);
             getMapData(gMap, new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()));
         }
 
@@ -280,8 +278,8 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void setMapViewByDonors(ArrayList<User> userArrayList) {
+        progressBar.setVisibility(View.VISIBLE);
         final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
-
         gMap.clear();
         if (!userArrayList.isEmpty()) {
             for (int i = 0; i < userArrayList.size(); i++) {
@@ -297,15 +295,18 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                         + " month(s) ago"
                 );
 
-                double lat = userArrayList.get(i).getLat();
-                double lng = userArrayList.get(i).getLng();
+                int lat = (int) userArrayList.get(i).getLat();
+                int lng = (int) userArrayList.get(i).getLng();
 
-                if (lat > 0){
+                if (lat > 0 && lng > 0){
                     LatLng latLng = new LatLng(lat,lng);
                     markerOption.position(latLng);
                 } else {
                     String add = userArrayList.get(i).getAddress();
-                   markerOption.position(getLocationFromAddress(add));
+                    LatLng l = getLocationFromAddress(add);
+                    if (l!=null){
+                        markerOption.position(l);
+                    }
                 }
 
                 markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
@@ -343,7 +344,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 progressBar.setVisibility(View.INVISIBLE);
             }
         } else {
-
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -389,6 +390,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         } else {
             String message = "Sorry! Internal Error!";
             showSnackMessage(message);
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -401,6 +403,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     @Override
     public void onFirebaseInternalError(String error) {
         showSnackMessage(error);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     @Override

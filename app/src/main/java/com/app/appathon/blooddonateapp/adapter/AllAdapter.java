@@ -13,8 +13,12 @@ import android.widget.TextView;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.activities.UserProfileActivity;
 import com.app.appathon.blooddonateapp.model.User;
-import java.util.Calendar;
 import java.util.List;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by IMRAN on 10/22/2016.
@@ -38,39 +42,34 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
 
     @Override
     public void onBindViewHolder(final ListHolder holder, final int position) {
-        Calendar c = Calendar.getInstance();
-        int curMonth = c.get(Calendar.MONTH)+1;
-        int donateDATE = arrayColumns.get(position).getLastDonate();
+
+        String date = arrayColumns.get(position).getLastDonate();
+
+        if (date.compareTo("0")==0){
+            holder.tDonateDate.setText(R.string.last_donated);
+            holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
+        } else {
+            try {
+                int donateDATE = differenceBetweenDates(date);
+                if (donateDATE == 1){
+                    holder.tDonateDate.setText("Last Donated "+donateDATE+" month ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
+                }
+                else if(donateDATE > 1 && donateDATE <= 3){
+                    holder.tDonateDate.setText("Last Donated "+donateDATE+" months ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
+                } else if(donateDATE > 3){
+                    holder.tDonateDate.setText("Last Donated "+ donateDATE +" months ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         final Typeface ThemeFont = Typeface.createFromAsset(mContext.getAssets(), "fonts/HelveticaNeue.ttf");
         final String id = arrayColumns.get(position).getId();
-
-        if(donateDATE==0){
-            holder.tDonateDate.setText(R.string.last_donated);
-            holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
-        }
-        else if(donateDATE==1){
-            holder.tDonateDate.setText("Last Donated "+donateDATE+" month ago");
-            holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
-        }
-        else if(curMonth>donateDATE){
-            int interValTime = curMonth - donateDATE;
-            int lastDonated = curMonth - interValTime;
-            holder.tDonateDate.setText("Last Donated "+ lastDonated +" months ago");
-            if (interValTime > 3){
-                holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
-            } else {
-                holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
-            }
-        } else if(donateDATE>curMonth){
-            int interValTime = (donateDATE + curMonth + 2) - donateDATE;
-            holder.tDonateDate.setText("Last Donated "+interValTime+" months ago");
-            if (interValTime > 3){
-                holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
-            } else {
-                holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
-            }
-        }
 
         holder.tName.setText(arrayColumns.get(position).getName());
         holder.tBloodGroup.setText(arrayColumns.get(position).getBloodGroup());
@@ -105,6 +104,17 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
     public void refreshList(List<User> list) {
         this.arrayColumns = list;
         notifyDataSetChanged();
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 
     final class ListHolder extends RecyclerView.ViewHolder {

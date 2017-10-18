@@ -7,6 +7,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -19,17 +22,18 @@ import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.PlacesAutoCompleteAdapter;
 import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
 import com.app.appathon.blooddonateapp.model.User;
+import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import java.util.ArrayList;
 
-public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
+public class SignUpActivity extends AppCompatActivity implements View.OnTouchListener {
 
-    private EditText etName, etEmail, bldGrpET;
+    private EditText etName, etEmail, bldGrpET, donateET;
     private AutoCompleteTextView areaET;
-    private MaterialSpinner materialSpinner, genderSpinner;
+    private MaterialSpinner genderSpinner;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
 
@@ -76,11 +80,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         etEmail = (EditText) findViewById(R.id.sup_email);
         bldGrpET = (EditText) findViewById(R.id.input_blood);
         areaET = (AutoCompleteTextView) findViewById(R.id.input_area);
-        FloatingActionButton btn_signUp = (FloatingActionButton) findViewById(R.id.btn_signUp);
+        donateET = (EditText) findViewById(R.id.donateDate);
+        donateET.setEnabled(false);
 
-        materialSpinner = (MaterialSpinner) findViewById(R.id.donateDate);
         genderSpinner = (MaterialSpinner) findViewById(R.id.gender);
-        materialSpinner.setItems(month);
         genderSpinner.setItems(gender);
 
         PlacesAutoCompleteAdapter adapter = new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item);
@@ -94,9 +97,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
             }
         });
-
-        btn_signUp.setOnClickListener(this);
-
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -146,7 +146,12 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         String bldGrp = bldGrpET.getText().toString();
         String area = areaET.getText().toString();
 
-        int dDate = materialSpinner.getSelectedIndex();
+        String dDate;
+        if (TextUtils.isEmpty(etName.getText().toString())){
+            dDate = "0";
+        } else {
+            dDate = donateET.getText().toString();
+        }
         String gender = genderSpinner.getItems().get(genderSpinner.getSelectedIndex()).toString();
 
         String uId="";
@@ -170,6 +175,22 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             return email;
         }
     }
+
+    private void showDatePicker() {
+        CalendarDatePickerDialogFragment dialog = new CalendarDatePickerDialogFragment()
+                .setOnDateSetListener(dateSetListener)
+                .setThemeDark();
+        dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
+    }
+
+    CalendarDatePickerDialogFragment.OnDateSetListener dateSetListener = new CalendarDatePickerDialogFragment.OnDateSetListener() {
+        @Override
+        public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
+            // Set date from user input.
+            String date_of_birth = dayOfMonth + "/" + monthOfYear + "/" + year;
+            donateET.setText(date_of_birth);
+        }
+    };
 
     private boolean validateForm() {
         boolean result = true;
@@ -205,10 +226,52 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         return result;
     }
 
-    private void writeNewUser(String userId, String uname, String name, String email, String gender, String phone, String address, String blood, int date) {
+    private void writeNewUser(String userId, String uname, String name, String email, String gender, String phone, String address, String blood, String date) {
         User user = new User(userId, uname, name, email, phone,
                 address, blood, date, gender, 0, 0,"");
         mDatabase.child("users").child(userId).setValue(user);
         Toast.makeText(SignUpActivity.this, "Successfully account created", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.signup_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_add:
+                if (validateForm()){
+                    onAuthSuccess();
+                }
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (v.getId()){
+            case R.id.donateDate:
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        //action here
+                        showDatePicker();
+                        return true;
+                    }
+                }
+                return false;
+            default:
+                break;
+        }
+        return false;
     }
 }

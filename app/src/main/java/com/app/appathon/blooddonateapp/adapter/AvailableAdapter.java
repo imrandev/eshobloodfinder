@@ -18,6 +18,11 @@ import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
 import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
 import com.app.appathon.blooddonateapp.model.User;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by IMRAN on 10/22/2016.
  */
@@ -53,17 +58,25 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
     public void onBindViewHolder(final ListHolder holder, final int position) {
 
         final Typeface ThemeFont = Typeface.createFromAsset(mContext.getAssets(), "fonts/HelveticaNeue.ttf");
-
         final String id = arrayColumns.get(position).getId();
+        String date = arrayColumns.get(position).getLastDonate();
 
-        if (arrayColumns.get(position).getLastDonate() == 0) {
+        if (date.compareTo("0")==0){
             holder.tDonateDate.setText(R.string.last_donated);
-        } else if (arrayColumns.get(position).lastDonate == 1) {
-            holder.tDonateDate.setText("Last Donated " +
-                    arrayColumns.get(position).getLastDonate() + " month ago");
         } else {
-            holder.tDonateDate.setText("Last Donated " +
-                    arrayColumns.get(position).getLastDonate() + " months ago");
+            try {
+                int donateDATE = differenceBetweenDates(date);
+
+                if (donateDATE == 1) {
+                    holder.tDonateDate.setText("Last Donated " +
+                            arrayColumns.get(position).getLastDonate() + " month ago");
+                } else {
+                    holder.tDonateDate.setText("Last Donated " +
+                            arrayColumns.get(position).getLastDonate() + " months ago");
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
         holder.tName.setText(arrayColumns.get(position).getName());
@@ -122,6 +135,17 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
     @Override
     public void SendRequestMsgToUser(String userId, String email, String name, String blood) {
 
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 
     final class ListHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
