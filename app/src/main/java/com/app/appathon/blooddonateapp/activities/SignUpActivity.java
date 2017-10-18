@@ -124,19 +124,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
         FirebaseAuth.getInstance().signOut();
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_signUp:
-                if (validateForm()){
-                    onAuthSuccess();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     private void onAuthSuccess() {
         String email = etEmail.getText().toString();
         if(!TextUtils.isEmpty(email)){
@@ -163,6 +150,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
         //write new user
         writeNewUser(uId, username, name, email, gender, phone, area, bldGrp, dDate);
 
+        interAdsActivity.launchInter();
+        interAdsActivity.loadInterstitial();
         //Go to MainActivity
         startActivity(new Intent(this, MainActivity.class));
         finish();
