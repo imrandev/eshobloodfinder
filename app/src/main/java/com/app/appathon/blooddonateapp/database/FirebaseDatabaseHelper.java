@@ -328,8 +328,4 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
             }
         }
     }
-
-    public void getPhoneSecurityData(){
-
-    }
 }
