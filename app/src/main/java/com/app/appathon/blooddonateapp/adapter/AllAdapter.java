@@ -45,7 +45,7 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
 
         String date = arrayColumns.get(position).getLastDonate();
 
-        if (date.compareTo("0")==0){
+        if (date.compareTo("Never")==0){
             holder.tDonateDate.setText(R.string.last_donated);
             holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
         } else {

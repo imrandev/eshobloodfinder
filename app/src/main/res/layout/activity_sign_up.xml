@@ -230,7 +230,7 @@
                         android:src="@drawable/ic_timer" />
 
                     <android.support.design.widget.TextInputLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3.2"
                         android:background="@drawable/custom_edittext_bg">
@@ -240,11 +240,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="40dp"
                             android:background="@android:color/transparent"
+                            android:drawableEnd="@drawable/ic_date_range"
+                            android:drawableRight="@drawable/ic_date_range"
                             android:hint="Last Donate"
                             android:inputType="date"
                             android:padding="5dp"
-                            android:drawableEnd="@drawable/ic_date_range"
-                            android:drawableRight="@drawable/ic_date_range"
                             android:textColor="@android:color/white" />
                     </android.support.design.widget.TextInputLayout>
                 </LinearLayout>

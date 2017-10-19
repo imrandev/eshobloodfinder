@@ -29,7 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import java.util.ArrayList;
 
-public class SignUpActivity extends AppCompatActivity implements View.OnTouchListener {
+public class SignUpActivity extends AppCompatActivity {
 
     private EditText etName, etEmail, bldGrpET, donateET;
     private AutoCompleteTextView areaET;
@@ -81,7 +81,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
         bldGrpET = (EditText) findViewById(R.id.input_blood);
         areaET = (AutoCompleteTextView) findViewById(R.id.input_area);
         donateET = (EditText) findViewById(R.id.donateDate);
-        donateET.setEnabled(false);
+        //donateET.setEnabled(false);
 
         genderSpinner = (MaterialSpinner) findViewById(R.id.gender);
         genderSpinner.setItems(gender);
@@ -97,6 +97,26 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
 
             }
         });
+
+        donateET.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        showDatePicker();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -134,8 +154,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
         String area = areaET.getText().toString();
 
         String dDate;
-        if (TextUtils.isEmpty(etName.getText().toString())){
-            dDate = "0";
+        if (TextUtils.isEmpty(donateET.getText().toString())){
+            dDate = "Never";
         } else {
             dDate = donateET.getText().toString();
         }
@@ -176,6 +196,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
         @Override
         public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
             // Set date from user input.
+            monthOfYear = monthOfYear +1;
             String date_of_birth = dayOfMonth + "/" + monthOfYear + "/" + year;
             donateET.setText(date_of_birth);
         }
@@ -239,28 +260,5 @@ public class SignUpActivity extends AppCompatActivity implements View.OnTouchLis
             default:
                 return false;
         }
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (v.getId()){
-            case R.id.donateDate:
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        //action here
-                        showDatePicker();
-                        return true;
-                    }
-                }
-                return false;
-            default:
-                break;
-        }
-        return false;
     }
 }

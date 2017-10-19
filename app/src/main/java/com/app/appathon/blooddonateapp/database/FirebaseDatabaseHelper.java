@@ -144,7 +144,7 @@ public class FirebaseDatabaseHelper implements TrackUserLocation{
                     if (!firebaseUser.getUid().equals(snapshot.getKey())){
                         String date = user.lastDonate;
                         try {
-                            if(date.compareTo("0")==0){
+                            if(date.compareTo("Never")==0){
                                 availableUserList.add(user);
                             } else {
                                 int donateDATE = differenceBetweenDates(date);

@@ -61,7 +61,7 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
         final String id = arrayColumns.get(position).getId();
         String date = arrayColumns.get(position).getLastDonate();
 
-        if (date.compareTo("0")==0){
+        if (date.compareTo("Never")==0){
             holder.tDonateDate.setText(R.string.last_donated);
         } else {
             try {

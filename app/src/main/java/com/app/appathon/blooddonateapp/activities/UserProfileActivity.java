@@ -195,11 +195,16 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 bloodView.setText(bloodGroup);
                 //get user last donate date
                 try {
-                    user_donate = differenceBetweenDates(user.getLastDonate());
+                    String dDate = user.getLastDonate();
+                    if (dDate.compareTo("Never")==0){
+                        donateView.setText(dDate);
+                    } else {
+                        user_donate = differenceBetweenDates(user.getLastDonate());
+                        donateView.setText(String.valueOf(user_donate));
+                    }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                donateView.setText(String.valueOf(user_donate));
                 //user gender
                 gender = user.getGender();
                 genderView.setText(gender);

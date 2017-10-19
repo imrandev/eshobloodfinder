@@ -8,8 +8,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
@@ -24,6 +26,7 @@ import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.adapter.PlacesAutoCompleteAdapter;
 import com.app.appathon.blooddonateapp.model.ProfileSecurity;
 import com.app.appathon.blooddonateapp.model.User;
+import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -49,9 +52,8 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
     private View snackView;
     private String user_phone, user_area;
     private int user_donate;
-    private MaterialSpinner materialSpinner;
     private ArrayList<Integer> month = new ArrayList<>();
-    private EditText phoneEdit;
+    private EditText phoneEdit, donateET;
     private AutoCompleteTextView auto;
 
     @Override
@@ -144,9 +146,16 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         for (DataSnapshot snapshot : dataSnapshot.getChildren()){
             User user = snapshot.getValue(User.class);
             if (snapshot.getKey().equals(firebaseUser.getUid())){
+                assert user != null;
                 user_phone = user.getPhone();
                 try {
-                    user_donate = differenceBetweenDates(user.getLastDonate());
+                    String dDate = user.getLastDonate();
+                    if (dDate.compareTo("Never")==0){
+                        lastDonate.setText(dDate);
+                    } else {
+                        user_donate = differenceBetweenDates(user.getLastDonate());
+                        lastDonate.setText(String.valueOf(user_donate));
+                    }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -157,7 +166,6 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
                 phone.setText(user.getPhone());
                 address.setText(user.getAddress());
                 gender.setText(user.getGender());
-                lastDonate.setText(String.valueOf(user.getLastDonate()));
 
                 if (snapshot.hasChild("security")){
                     DataSnapshot data = snapshot.child("security");
@@ -235,9 +243,27 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         phoneEdit = (EditText) dialog.findViewById(R.id.input_phone);
         phoneEdit.setText(user_phone);
 
-        materialSpinner = (MaterialSpinner) dialog.findViewById(R.id.donateDate);
-        materialSpinner.setItems(month);
-        materialSpinner.setSelectedIndex(user_donate);
+        donateET = (EditText) dialog.findViewById(R.id.donateDate);
+        donateET.setText(String.valueOf(user_donate));
+
+        donateET.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_LEFT = 0;
+                final int DRAWABLE_TOP = 1;
+                final int DRAWABLE_RIGHT = 2;
+                final int DRAWABLE_BOTTOM = 3;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        // your action here
+                        showDatePicker();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         auto = (AutoCompleteTextView) dialog.findViewById(R.id.input_area);
         auto.setText(user_area);
@@ -247,6 +273,23 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         dialog.show();
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
+
+    private void showDatePicker() {
+        CalendarDatePickerDialogFragment dialog = new CalendarDatePickerDialogFragment()
+                .setOnDateSetListener(dateSetListener)
+                .setThemeDark();
+        dialog.show(getSupportFragmentManager(), "DATE_PICKER_TAG");
+    }
+
+    CalendarDatePickerDialogFragment.OnDateSetListener dateSetListener = new CalendarDatePickerDialogFragment.OnDateSetListener() {
+        @Override
+        public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
+            // Set date from user input.
+            monthOfYear = monthOfYear +1;
+            String date_of_birth = dayOfMonth + "/" + monthOfYear + "/" + year;
+            donateET.setText(date_of_birth);
+        }
+    };
 
     private void updateProfile() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -261,8 +304,13 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         database.child("users").child(userId).child("phone").setValue(phone);
 
         //update last donate
-        int donate = Integer.parseInt(materialSpinner.getItems().get(materialSpinner.getSelectedIndex()).toString());
-        database.child("users").child(userId).child("lastDonate").setValue(donate);
+        String dDate;
+        if (TextUtils.isEmpty(donateET.getText().toString())){
+            dDate = "Never";
+        } else {
+            dDate = donateET.getText().toString();
+        }
+        database.child("users").child(userId).child("lastDonate").setValue(dDate);
 
         //update area
         String area = auto.getText().toString();
