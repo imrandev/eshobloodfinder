@@ -81,6 +81,7 @@ dependencies {
     compile 'com.google.firebase:firebase-ads:11.2.2'
     compile 'com.google.firebase:firebase-core:11.2.2'
     compile 'com.code-troopers.betterpickers:library:3.1.0'
+    compile 'org.jsoup:jsoup:1.10.3'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -55,6 +56,8 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
     private ArrayList<Integer> month = new ArrayList<>();
     private EditText phoneEdit, donateET;
     private AutoCompleteTextView auto;
+    private TextView ago;
+    private ImageView calender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +96,7 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         snackView = findViewById(R.id.activity_profile);
         state = (TextView) findViewById(R.id.state);
         gender = (TextView) findViewById(R.id.user_gender);
+        ago = (TextView) findViewById(R.id.ago);
 
         name.setTypeface(Helvetica);
         email.setTypeface(Helvetica);
@@ -152,6 +156,7 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
                     String dDate = user.getLastDonate();
                     if (dDate.compareTo("Never")==0){
                         lastDonate.setText(dDate);
+                        ago.setText("");
                     } else {
                         user_donate = differenceBetweenDates(user.getLastDonate());
                         lastDonate.setText(String.valueOf(user_donate));
@@ -242,28 +247,19 @@ public class ProfileActivity extends AppCompatActivity implements ValueEventList
         MaterialDialog dialog = builder.build();
         phoneEdit = (EditText) dialog.findViewById(R.id.input_phone);
         phoneEdit.setText(user_phone);
+        calender = (ImageView) dialog.findViewById(R.id.calender);
 
         donateET = (EditText) dialog.findViewById(R.id.donateDate);
         donateET.setText(String.valueOf(user_donate));
+        donateET.setEnabled(false);
 
-        donateET.setOnTouchListener(new View.OnTouchListener() {
+        calender.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        // your action here
-                        showDatePicker();
-                        return true;
-                    }
-                }
-                return false;
+            public void onClick(View v) {
+                showDatePicker();
             }
         });
+
 
         auto = (AutoCompleteTextView) dialog.findViewById(R.id.input_area);
         auto.setText(user_area);

@@ -15,8 +15,11 @@ import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class SplashActivity extends Activity {
 
@@ -53,13 +56,28 @@ public class SplashActivity extends Activity {
                 final FirebaseUser user = mAuth.getCurrentUser();
                 // Check auth on Activity start
                 if (user != null) {
+                    firebaseDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for(DataSnapshot data: dataSnapshot.getChildren()){
+                                if (data.child(user.getUid()).exists()) {
+                                    interAds.launchInter();
+                                    interAds.loadInterstitial();
+                                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                                    overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
+                                    finish();
+                                } else {
+                                    startActivity(new Intent(SplashActivity.this, SignUpActivity.class));
+                                    overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
+                                    finish();
+                                }
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                    interAds.launchInter();
-                    interAds.loadInterstitial();
-
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                    overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
-                    finish();
+                        }
+                    });
                 } else {
                     startActivity(new Intent(SplashActivity.this, SignInActivity.class));
                     overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);

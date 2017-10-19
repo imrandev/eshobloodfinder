@@ -48,6 +48,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private String bloodGroup, name, gender, nId;
     private View snackView;
     private FloatingActionButton buttonCall;
+    private TextView ago;
 
     private static final int REQUEST_PHONE_CALL = 1;
     private int user_donate;
@@ -84,6 +85,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         genderView = (TextView) findViewById(R.id.user_gender);
         buttonCall = (FloatingActionButton) findViewById(R.id.call_btn);
         snackView = findViewById(R.id.user_profile);
+        ago = (TextView) findViewById(R.id.ago);
 
         bloodView.setTypeface(Helvetica);
         nameView.setTypeface(Helvetica);
@@ -197,6 +199,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 try {
                     String dDate = user.getLastDonate();
                     if (dDate.compareTo("Never")==0){
+                        ago.setText("");
                         donateView.setText(dDate);
                     } else {
                         user_donate = differenceBetweenDates(user.getLastDonate());

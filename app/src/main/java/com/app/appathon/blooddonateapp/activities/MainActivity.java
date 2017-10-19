@@ -4,9 +4,12 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,11 +17,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -45,11 +48,8 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.onesignal.OSPermissionSubscriptionState;
 import com.onesignal.OneSignal;
+import org.jsoup.Jsoup;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements ValueEventListener, SearchView.OnQueryTextListener {
@@ -63,13 +63,16 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
     private TextView headerText;
     private SearchView searchView;
     public FragmentCommunicator fragmentCommunicator;
-    public int someIntValue =1;
+    public int someIntValue = 1;
     private FirebaseAnalytics mFirebaseAnalytics;
+    String currentVersion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getCurrentVersion();
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -94,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
 
         //Inflating NavHeader
         View navHeader = View.inflate(this, R.layout.navbar_head, null);
-        headerText = (TextView)navHeader.findViewById(R.id.user_name);
+        headerText = (TextView) navHeader.findViewById(R.id.user_name);
         headerText.setTypeface(ThemeFont);
 
         //Initializing Navigation Drawer
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                                 finish();
                             } else if (drawerItem.getIdentifier() == 2) {
-                                startActivity(new Intent(MainActivity.this,InboxActivity.class));
+                                startActivity(new Intent(MainActivity.this, InboxActivity.class));
                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                                 finish();
                             }
@@ -192,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_map:
                 startActivity(new Intent(MainActivity.this, NearbyDonorActivity.class));
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
@@ -213,10 +216,10 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
 
     @Override
     public void onDataChange(DataSnapshot dataSnapshot) {
-        for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
             User uData = snapshot.getValue(User.class);
-            if (uData != null){
-                if (snapshot.getKey().equals(firebaseUser.getUid())){
+            if (uData != null) {
+                if (snapshot.getKey().equals(firebaseUser.getUid())) {
                     String displayName = uData.getName();
                     headerText.setText(displayName);
                     Config.CURRENT_USERNAME = uData.getName();
@@ -294,5 +297,85 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
         }
     }
 
+    private void getCurrentVersion() {
+        PackageManager pm = this.getPackageManager();
+        PackageInfo pInfo = null;
 
+        try {
+            pInfo = pm.getPackageInfo(this.getPackageName(), 0);
+
+        } catch (PackageManager.NameNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        currentVersion = pInfo.versionName;
+        new GetVersionCode().execute();
+
+    }
+
+    private class GetVersionCode extends AsyncTask<Void, String, String> {
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            String newVersion = null;
+            try {
+                newVersion = Jsoup.connect("https://play.google.com/store/apps/details?id=" + MainActivity.this.getPackageName() + "&hl=it")
+                        .timeout(30000)
+                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                        .referrer("http://www.google.com")
+                        .get()
+                        .select("div[itemprop=softwareVersion]")
+                        .first()
+                        .ownText();
+                return newVersion;
+            } catch (Exception e) {
+                return newVersion;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String onlineVersion) {
+            super.onPostExecute(onlineVersion);
+            if (onlineVersion != null && !onlineVersion.isEmpty()) {
+                if (Float.valueOf(currentVersion) < Float.valueOf(onlineVersion)) {
+                    showUpdateDialog();
+                }
+            }
+            Log.d("update", "Current version " + currentVersion + "playstore version " + onlineVersion);
+        }
+
+        private void showUpdateDialog() {
+            MaterialDialog.Builder bulder = new MaterialDialog.Builder(MainActivity.this)
+                    .title("New Update Found")
+                    .backgroundColor(getResources().getColor(R.color.dialog_color))
+                    .titleColorRes(android.R.color.white)
+                    .positiveText("Update")
+                    .icon(getResources().getDrawable(R.mipmap.ic_launcher))
+                    .canceledOnTouchOutside(false)
+                    .autoDismiss(false)
+                    .cancelable(false)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Uri uri = Uri.parse("market://details?id=" + getApplicationContext().getPackageName());
+                            Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                            // To count with Play market backstack, After pressing back button,
+                            // to taken back to our application, we need to add following flags to intent.
+                            goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                                    Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET |
+                                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                            try {
+                                startActivity(goToMarket);
+                            } catch (ActivityNotFoundException e) {
+                                startActivity(new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
+                            }
+                        }
+                    });
+
+            MaterialDialog materialDialog = bulder.build();
+            materialDialog.show();
+        }
+
+    }
 }

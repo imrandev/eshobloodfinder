@@ -3,7 +3,6 @@ package com.app.appathon.blooddonateapp.activities;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -16,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.app.appathon.blooddonateapp.R;
@@ -31,15 +31,17 @@ import java.util.ArrayList;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private EditText etName, etEmail, bldGrpET, donateET;
+    private EditText etName, etEmail, donateET;
     private AutoCompleteTextView areaET;
-    private MaterialSpinner genderSpinner;
+    private MaterialSpinner genderSpinner,bldGrpSpinner;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
+    private ImageView calender;
 
     private InterstitialAdsHelper interAdsActivity;
 
-    private ArrayList<Integer> month = new ArrayList<>();
+    private ArrayList<String> bldType = new ArrayList<>();
+    private String[] bldGrp = {"A+","A-","B+","B-","AB+","AB-","O+","O-"};
     private ArrayList<String> gender = new ArrayList<>();
     private String username;
 
@@ -69,8 +71,8 @@ public class SignUpActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
 
-        for(int i=0; i<13; i++){
-            month.add(i);
+        for(int i=0; i<bldGrp.length; i++){
+            bldType.add(bldGrp[i]);
         }
 
         gender.add("Male");
@@ -78,13 +80,15 @@ public class SignUpActivity extends AppCompatActivity {
 
         etName = (EditText) findViewById(R.id.sup_name);
         etEmail = (EditText) findViewById(R.id.sup_email);
-        bldGrpET = (EditText) findViewById(R.id.input_blood);
+        bldGrpSpinner = (MaterialSpinner) findViewById(R.id.input_blood);
         areaET = (AutoCompleteTextView) findViewById(R.id.input_area);
         donateET = (EditText) findViewById(R.id.donateDate);
-        //donateET.setEnabled(false);
+        calender = (ImageView) findViewById(R.id.calender);
+        donateET.setEnabled(false);
 
         genderSpinner = (MaterialSpinner) findViewById(R.id.gender);
         genderSpinner.setItems(gender);
+        bldGrpSpinner.setItems(bldType);
 
         PlacesAutoCompleteAdapter adapter = new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item);
         adapter.notifyDataSetChanged();
@@ -98,22 +102,10 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-        donateET.setOnTouchListener(new View.OnTouchListener() {
+        calender.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (donateET.getRight() - donateET.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        // your action here
-                        showDatePicker();
-                        return true;
-                    }
-                }
-                return false;
+            public void onClick(View v) {
+                showDatePicker();
             }
         });
 
@@ -138,19 +130,13 @@ public class SignUpActivity extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        FirebaseAuth.getInstance().signOut();
-    }
-
     private void onAuthSuccess() {
         String email = etEmail.getText().toString();
         if(!TextUtils.isEmpty(email)){
             username = usernameFromEmail(email);
         }
         String name = etName.getText().toString();
-        String bldGrp = bldGrpET.getText().toString();
+        String bldGrp = bldGrpSpinner.getItems().get(bldGrpSpinner.getSelectedIndex()).toString();
         String area = areaET.getText().toString();
 
         String dDate;
@@ -218,14 +204,6 @@ public class SignUpActivity extends AppCompatActivity {
         } else {
             areaET.setError(null);
         }
-
-        if (TextUtils.isEmpty(bldGrpET.getText().toString())) {
-            bldGrpET.setError("Required");
-            result = false;
-        } else {
-            bldGrpET.setError(null);
-        }
-
 //        if (TextUtils.isEmpty(numberET.getText().toString())) {
 //            numberET.setError("Required");
 //            result = false;
