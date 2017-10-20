@@ -4,12 +4,9 @@ import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -48,33 +45,25 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.onesignal.OSPermissionSubscriptionState;
 import com.onesignal.OneSignal;
-import org.jsoup.Jsoup;
 
 
-
-public class MainActivity extends AppCompatActivity implements ValueEventListener, SearchView.OnQueryTextListener {
+public class MainActivity extends AppCompatActivity
+        implements ValueEventListener, SearchView.OnQueryTextListener {
 
     private FragmentTransaction fragmentTransaction;
     public MaterialSpinner spinner;
     private Fragment fragment;
-    private DatabaseReference mDatabase;
-    private FirebaseAuth mAuth;
     private FirebaseUser firebaseUser;
     private TextView headerText;
-    private SearchView searchView;
     public FragmentCommunicator fragmentCommunicator;
     public int someIntValue = 1;
-    private FirebaseAnalytics mFirebaseAnalytics;
-    String currentVersion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getCurrentVersion();
-
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Handle Toolbar
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -84,9 +73,9 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
         final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
 
         //Initializing Firebase
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.child("users").addValueEventListener(this);
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         firebaseUser = mAuth.getCurrentUser();
 
         //Setting The Tag for sending notification
@@ -185,8 +174,7 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
 
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView =
-                (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(this);
@@ -295,87 +283,5 @@ public class MainActivity extends AppCompatActivity implements ValueEventListene
             startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
         }
-    }
-
-    private void getCurrentVersion() {
-        PackageManager pm = this.getPackageManager();
-        PackageInfo pInfo = null;
-
-        try {
-            pInfo = pm.getPackageInfo(this.getPackageName(), 0);
-
-        } catch (PackageManager.NameNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        currentVersion = pInfo.versionName;
-        new GetVersionCode().execute();
-
-    }
-
-    private class GetVersionCode extends AsyncTask<Void, String, String> {
-        @Override
-        protected String doInBackground(Void... voids) {
-
-            String newVersion = null;
-            try {
-                newVersion = Jsoup.connect("https://play.google.com/store/apps/details?id=" + MainActivity.this.getPackageName() + "&hl=it")
-                        .timeout(30000)
-                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                        .referrer("http://www.google.com")
-                        .get()
-                        .select("div[itemprop=softwareVersion]")
-                        .first()
-                        .ownText();
-                return newVersion;
-            } catch (Exception e) {
-                return newVersion;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String onlineVersion) {
-            super.onPostExecute(onlineVersion);
-            if (onlineVersion != null && !onlineVersion.isEmpty()) {
-                if (Float.valueOf(currentVersion) < Float.valueOf(onlineVersion)) {
-                    showUpdateDialog();
-                }
-            }
-            Log.d("update", "Current version " + currentVersion + "playstore version " + onlineVersion);
-        }
-
-        private void showUpdateDialog() {
-            MaterialDialog.Builder bulder = new MaterialDialog.Builder(MainActivity.this)
-                    .title("New Update Found")
-                    .backgroundColor(getResources().getColor(R.color.dialog_color))
-                    .titleColorRes(android.R.color.white)
-                    .positiveText("Update")
-                    .icon(getResources().getDrawable(R.mipmap.ic_launcher))
-                    .canceledOnTouchOutside(false)
-                    .autoDismiss(false)
-                    .cancelable(false)
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            Uri uri = Uri.parse("market://details?id=" + getApplicationContext().getPackageName());
-                            Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                            // To count with Play market backstack, After pressing back button,
-                            // to taken back to our application, we need to add following flags to intent.
-                            goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                                    Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET |
-                                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                            try {
-                                startActivity(goToMarket);
-                            } catch (ActivityNotFoundException e) {
-                                startActivity(new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse("http://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
-                            }
-                        }
-                    });
-
-            MaterialDialog materialDialog = bulder.build();
-            materialDialog.show();
-        }
-
     }
 }

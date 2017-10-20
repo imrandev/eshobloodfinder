@@ -44,30 +44,6 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
     public void onBindViewHolder(final ListHolder holder, final int position) {
 
         String date = arrayColumns.get(position).getLastDonate();
-
-        if (date.compareTo("Never")==0){
-            holder.tDonateDate.setText(R.string.last_donated);
-            holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
-        } else {
-            try {
-                int donateDATE = differenceBetweenDates(date);
-                if (donateDATE == 1){
-                    holder.tDonateDate.setText("Last Donated "+donateDATE+" month ago");
-                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
-                }
-                else if(donateDATE > 1 && donateDATE <= 3){
-                    holder.tDonateDate.setText("Last Donated "+donateDATE+" months ago");
-                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
-                } else if(donateDATE > 3){
-                    holder.tDonateDate.setText("Last Donated "+ donateDATE +" months ago");
-                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
-
         final Typeface ThemeFont = Typeface.createFromAsset(mContext.getAssets(), "fonts/HelveticaNeue.ttf");
         final String id = arrayColumns.get(position).getId();
 
@@ -79,6 +55,28 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
         holder.tDonateDate.setTypeface(ThemeFont);
         holder.tArea.setTypeface(ThemeFont);
         holder.tBloodGroup.setTypeface(ThemeFont);
+
+        if (date.compareTo("Never")==0){
+            holder.tDonateDate.setText(R.string.last_donated);
+            holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
+        } else {
+            try {
+                int donateDATE = differenceBetweenDates(date);
+                if (donateDATE == 1){
+                    holder.tDonateDate.setText("Last Donated "+donateDATE+" month ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
+                }
+                if(donateDATE <= 3){
+                    holder.tDonateDate.setText("Last Donated "+donateDATE+" months ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
+                } else {
+                    holder.tDonateDate.setText("Last Donated "+ donateDATE +" months ago");
+                    holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,11 +97,6 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
     @Override
     public long getItemId(int position) {
         return super.getItemId(getItemCount() - position - 1);
-    }
-
-    public void refreshList(List<User> list) {
-        this.arrayColumns = list;
-        notifyDataSetChanged();
     }
 
     private int differenceBetweenDates(String prev_date) throws ParseException {

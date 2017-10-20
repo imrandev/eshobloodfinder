@@ -226,6 +226,7 @@ public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.
         for (User model : models) {
             String add = model.address.toLowerCase() + " " + model.bloodGroup.toLowerCase();
             String[] words = add.replace(",", "").split("\\s");
+
             //check duplicate word
             for (int i = 0; i < words.length; i++) {
                 for (int j = 0; j < words.length; j++) {

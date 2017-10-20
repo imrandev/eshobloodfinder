@@ -61,24 +61,6 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
         final String id = arrayColumns.get(position).getId();
         String date = arrayColumns.get(position).getLastDonate();
 
-        if (date.compareTo("Never")==0){
-            holder.tDonateDate.setText(R.string.last_donated);
-        } else {
-            try {
-                int donateDATE = differenceBetweenDates(date);
-
-                if (donateDATE == 1) {
-                    holder.tDonateDate.setText("Last Donated " +
-                            arrayColumns.get(position).getLastDonate() + " month ago");
-                } else {
-                    holder.tDonateDate.setText("Last Donated " +
-                            arrayColumns.get(position).getLastDonate() + " months ago");
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
         holder.tName.setText(arrayColumns.get(position).getName());
         holder.proImage.setText(arrayColumns.get(position).getBloodGroup());
         holder.tArea.setText(arrayColumns.get(position).getAddress());
@@ -89,6 +71,24 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
         holder.proImage.setTypeface(ThemeFont);
 
         holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
+
+        if (date.compareTo("Never")==0){
+            holder.tDonateDate.setText(R.string.last_donated);
+        } else {
+            try {
+                int donateDATE = differenceBetweenDates(date);
+
+                if (donateDATE == 1) {
+                    holder.tDonateDate.setText("Last Donated " +
+                            donateDATE + " month ago");
+                } else {
+                    holder.tDonateDate.setText("Last Donated " +
+                            donateDATE + " months ago");
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override

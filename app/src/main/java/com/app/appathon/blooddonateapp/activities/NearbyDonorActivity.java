@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,8 +43,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.nlopez.smartlocation.OnActivityUpdatedListener;
 import io.nlopez.smartlocation.OnGeofencingTransitionListener;
@@ -286,14 +292,36 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 String blood = userArrayList.get(i).getBloodGroup();
                 String uId = userArrayList.get(i).getId();
                 String userName = userArrayList.get(i).getName();
-                String donateDate = String.valueOf(userArrayList.get(i).getLastDonate());
+                String date = userArrayList.get(i).getLastDonate();
 
                 MarkerOptions markerOption = new MarkerOptions();
-                markerOption.snippet("Blood Group : " + blood
-                        + "\n"
-                        + "Last Donate : " + donateDate
-                        + " month(s) ago"
-                );
+
+                if (date.compareTo("Never")==0){
+                    markerOption.snippet("Blood Group : " + blood
+                            + "\n"
+                            + "Last Donate : " + date
+                    );
+                } else {
+                    try {
+                        int donateDate = differenceBetweenDates(date);
+
+                        if (donateDate <= 1){
+                            markerOption.snippet("Blood Group : " + blood
+                                    + "\n"
+                                    + "Last Donate : " + donateDate
+                                    + " month ago"
+                            );
+                        } else {
+                            markerOption.snippet("Blood Group : " + blood
+                                    + "\n"
+                                    + "Last Donate : " + donateDate
+                                    + " month(s) ago"
+                            );
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 int lat = (int) userArrayList.get(i).getLat();
                 int lng = (int) userArrayList.get(i).getLng();
@@ -464,5 +492,16 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
             }
             return filteredModelList;
         }
+    }
+
+    private int differenceBetweenDates(String prev_date) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Date p_date = simpleDateFormat.parse(prev_date);
+        Date now = new Date(System.currentTimeMillis());
+
+        //difference between dates
+        long difference = Math.abs(p_date.getTime() - now.getTime());
+        long differenceDates = difference / (24 * 60 * 60 * 1000);
+        return (int) differenceDates/30;
     }
 }
