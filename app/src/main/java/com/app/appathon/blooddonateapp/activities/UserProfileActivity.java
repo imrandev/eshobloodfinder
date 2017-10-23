@@ -51,7 +51,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private TextView ago;
 
     private static final int REQUEST_PHONE_CALL = 1;
-    private int user_donate;
+    private String user_donate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,7 +203,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         donateView.setText(dDate);
                     } else {
                         user_donate = differenceBetweenDates(user.getLastDonate());
-                        donateView.setText(String.valueOf(user_donate));
+                        donateView.setText(user_donate.split("\\s")[0]);
+                        ago.setText("" + user_donate.split("\\s")[1] + " " + user_donate.split("\\s")[2]);
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -231,7 +232,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private int differenceBetweenDates(String prev_date) throws ParseException {
+    private String differenceBetweenDates(String prev_date) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Date p_date = simpleDateFormat.parse(prev_date);
         Date now = new Date(System.currentTimeMillis());
@@ -239,7 +240,24 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         //difference between dates
         long difference = Math.abs(p_date.getTime() - now.getTime());
         long differenceDates = difference / (24 * 60 * 60 * 1000);
-        return (int) differenceDates/30;
+
+        int month = (int) differenceDates/30;
+
+        if (month >= 12){
+            int year = month / 12;
+
+            if (year == 1){
+                return "" + year + " year ago";
+            } else {
+                return "" + year + " years ago";
+            }
+        } else {
+            if (month == 1){
+                return "" + month + " month ago";
+            } else {
+                return "" + month + " month ago";
+            }
+        }
     }
 
     @Override

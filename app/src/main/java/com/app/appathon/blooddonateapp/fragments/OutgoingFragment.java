@@ -26,7 +26,6 @@ public class OutgoingFragment extends Fragment implements FirebaseDatabaseHelper
     private ArrayList<User> outMsgList = new ArrayList<>();
     private RecyclerView outgoingView;
     private ArrayList<Inbox> outgoingList = new ArrayList<>();
-    private ArrayList<String> msg_count = new ArrayList<>();
 
     public OutgoingFragment() {
         // Required empty public constructor
@@ -45,11 +44,8 @@ public class OutgoingFragment extends Fragment implements FirebaseDatabaseHelper
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_outgoing, container, false);
 
-
         outgoingView = (RecyclerView) rootView.findViewById(R.id.inbox_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setReverseLayout(true);
-        layoutManager.setStackFromEnd(true);
         outgoingView.setLayoutManager(layoutManager);
 
         FirebaseDatabaseHelper databaseHelper = new FirebaseDatabaseHelper(getActivity(), this);

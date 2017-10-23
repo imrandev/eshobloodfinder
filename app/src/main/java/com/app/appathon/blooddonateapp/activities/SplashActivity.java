@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
+import com.app.appathon.blooddonateapp.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -24,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 public class SplashActivity extends Activity {
 
     private FirebaseAuth mAuth;
-    DatabaseReference firebaseDatabase;
+    private DatabaseReference firebaseDatabase;
 
     private InterstitialAdsHelper interAds;
 
@@ -50,22 +51,22 @@ public class SplashActivity extends Activity {
         int SPLASH_DISPLAY_LENGTH = 2000;
         new Handler().postDelayed(new Runnable() {
             @Override
-
             public void run() {
 
                 final FirebaseUser user = mAuth.getCurrentUser();
-                // Check auth on Activity start
+                //Check auth on Activity start
                 if (user != null) {
-                    firebaseDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                    firebaseDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             for(DataSnapshot data: dataSnapshot.getChildren()){
-                                if (data.child(user.getUid()).exists()) {
+                                if (data.exists()) {
                                     interAds.launchInter();
                                     interAds.loadInterstitial();
                                     startActivity(new Intent(SplashActivity.this, MainActivity.class));
                                     overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);
                                     finish();
+                                    break;
                                 } else {
                                     startActivity(new Intent(SplashActivity.this, SignUpActivity.class));
                                     overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_right);

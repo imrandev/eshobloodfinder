@@ -61,16 +61,17 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
             holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
         } else {
             try {
-                int donateDATE = differenceBetweenDates(date);
-                if (donateDATE == 1){
-                    holder.tDonateDate.setText("Last Donated "+donateDATE+" month ago");
+                String donateDATE = differenceBetweenDates(date);
+                int dDate = Integer.parseInt(donateDATE.split("\\s")[0]);
+                if (dDate == 1){
+                    holder.tDonateDate.setText("Last Donated " + donateDATE);
                     holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
                 }
-                if(donateDATE <= 3){
-                    holder.tDonateDate.setText("Last Donated "+donateDATE+" months ago");
+                if(dDate <= 3){
+                    holder.tDonateDate.setText("Last Donated " +donateDATE);
                     holder.tBloodGroup.setBackgroundResource(R.drawable.round_red);
                 } else {
-                    holder.tDonateDate.setText("Last Donated "+ donateDATE +" months ago");
+                    holder.tDonateDate.setText("Last Donated "+ donateDATE);
                     holder.tBloodGroup.setBackgroundResource(R.drawable.round_bg);
                 }
             } catch (ParseException e) {
@@ -99,7 +100,7 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
         return super.getItemId(getItemCount() - position - 1);
     }
 
-    private int differenceBetweenDates(String prev_date) throws ParseException {
+    private String differenceBetweenDates(String prev_date) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Date p_date = simpleDateFormat.parse(prev_date);
         Date now = new Date(System.currentTimeMillis());
@@ -107,7 +108,24 @@ public class AllAdapter extends RecyclerView.Adapter<AllAdapter.ListHolder>{
         //difference between dates
         long difference = Math.abs(p_date.getTime() - now.getTime());
         long differenceDates = difference / (24 * 60 * 60 * 1000);
-        return (int) differenceDates/30;
+
+        int month = (int) differenceDates/30;
+
+        if (month >= 12){
+            int year = month / 12;
+
+            if (year == 1){
+                return "" + year + " year ago";
+            } else {
+                return "" + year + " years ago";
+            }
+        } else {
+            if (month == 1){
+                return "" + month + " month ago";
+            } else {
+                return "" + month + " month ago";
+            }
+        }
     }
 
     final class ListHolder extends RecyclerView.ViewHolder {

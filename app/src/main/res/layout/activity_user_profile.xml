@@ -192,7 +192,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.9"
-                        android:text="month(s)ago"
                         android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
                 </LinearLayout>

@@ -8,7 +8,6 @@ public class User {
 
     public String id;
     public String sendNotification;
-    public String username;
     public String name;
     public String email;
     public String phone;
@@ -23,10 +22,9 @@ public class User {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public User(String id, String username, String name, String email, String phone, String address,
+    public User(String id, String name, String email, String phone, String address,
                 String bloodGroup, String lastDonate, String gender, double lat, double lng, String sendNotification) {
         this.id = id;
-        this.username = username;
         this.lat = lat;
         this.lng = lng;
         this.name = name;
@@ -69,14 +67,6 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getName() {

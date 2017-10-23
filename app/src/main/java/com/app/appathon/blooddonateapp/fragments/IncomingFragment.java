@@ -56,8 +56,6 @@ public class IncomingFragment extends Fragment implements FirebaseDatabaseHelper
 
         incomingView = (RecyclerView) rootView.findViewById(R.id.inbox_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setReverseLayout(true);
-        layoutManager.setStackFromEnd(true);
         incomingView.setLayoutManager(layoutManager);
 
         FirebaseDatabaseHelper databaseHelper = new FirebaseDatabaseHelper(getActivity(), this);

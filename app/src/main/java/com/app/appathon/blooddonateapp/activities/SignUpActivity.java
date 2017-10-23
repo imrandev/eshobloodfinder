@@ -24,6 +24,7 @@ import com.app.appathon.blooddonateapp.helper.InterstitialAdsHelper;
 import com.app.appathon.blooddonateapp.model.User;
 import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jaredrummler.materialspinner.MaterialSpinner;
@@ -36,14 +37,11 @@ public class SignUpActivity extends AppCompatActivity {
     private MaterialSpinner genderSpinner,bldGrpSpinner;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    private ImageView calender;
-
     private InterstitialAdsHelper interAdsActivity;
 
     private ArrayList<String> bldType = new ArrayList<>();
     private String[] bldGrp = {"A+","A-","B+","B-","AB+","AB-","O+","O-"};
     private ArrayList<String> gender = new ArrayList<>();
-    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +81,7 @@ public class SignUpActivity extends AppCompatActivity {
         bldGrpSpinner = (MaterialSpinner) findViewById(R.id.input_blood);
         areaET = (AutoCompleteTextView) findViewById(R.id.input_area);
         donateET = (EditText) findViewById(R.id.donateDate);
-        calender = (ImageView) findViewById(R.id.calender);
+        ImageView calender = (ImageView) findViewById(R.id.calender);
         donateET.setEnabled(false);
 
         genderSpinner = (MaterialSpinner) findViewById(R.id.gender);
@@ -132,9 +130,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void onAuthSuccess() {
         String email = etEmail.getText().toString();
-        if(!TextUtils.isEmpty(email)){
-            username = usernameFromEmail(email);
-        }
         String name = etName.getText().toString();
         String bldGrp = bldGrpSpinner.getItems().get(bldGrpSpinner.getSelectedIndex()).toString();
         String area = areaET.getText().toString();
@@ -143,32 +138,32 @@ public class SignUpActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(donateET.getText().toString())){
             dDate = "Never";
         } else {
-            dDate = donateET.getText().toString();
+            dDate = "" + donateET.getText().toString();
         }
         String gender = genderSpinner.getItems().get(genderSpinner.getSelectedIndex()).toString();
 
         String uId="";
         String phone="";
-        if(mAuth!=null){
-            uId = mAuth.getCurrentUser().getUid();
-            phone = mAuth.getCurrentUser().getPhoneNumber();
-        }
-        //write new user
-        writeNewUser(uId, username, name, email, gender, phone, area, bldGrp, dDate);
 
+        //get current user id and phone no.
+        if(mAuth!=null){
+            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+
+            assert firebaseUser!=null;
+            uId = firebaseUser.getUid();
+            phone = firebaseUser.getPhoneNumber();
+        }
+
+        //write new user
+        writeNewUser(uId, name, email, gender, phone, area, bldGrp, dDate);
+
+        //show ads
         interAdsActivity.launchInter();
         interAdsActivity.loadInterstitial();
+
         //Go to MainActivity
         startActivity(new Intent(this, MainActivity.class));
         finish();
-    }
-
-    private String usernameFromEmail(String email) {
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {
-            return email;
-        }
     }
 
     private void showDatePicker() {
@@ -182,8 +177,8 @@ public class SignUpActivity extends AppCompatActivity {
         @Override
         public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
             // Set date from user input.
-            monthOfYear = monthOfYear +1;
-            String date_of_birth = dayOfMonth + "/" + monthOfYear + "/" + year;
+            monthOfYear = monthOfYear + 1;
+            String date_of_birth = "" + dayOfMonth + "/" + monthOfYear + "/" + year;
             donateET.setText(date_of_birth);
         }
     };
@@ -204,19 +199,13 @@ public class SignUpActivity extends AppCompatActivity {
         } else {
             areaET.setError(null);
         }
-//        if (TextUtils.isEmpty(numberET.getText().toString())) {
-//            numberET.setError("Required");
-//            result = false;
-//        } else {
-//            numberET.setError(null);
-//        }
 
         return result;
     }
 
-    private void writeNewUser(String userId, String uname, String name, String email, String gender, String phone, String address, String blood, String date) {
-        User user = new User(userId, uname, name, email, phone,
-                address, blood, date, gender, 0, 0,"");
+    private void writeNewUser(String userId, String name, String email, String gender, String phone, String address, String blood, String date) {
+        User user = new User(userId, name, email, phone,
+                address, blood, date, gender, 0.0, 0.0,"");
         mDatabase.child("users").child(userId).setValue(user);
         Toast.makeText(SignUpActivity.this, "Successfully account created", Toast.LENGTH_SHORT).show();
     }

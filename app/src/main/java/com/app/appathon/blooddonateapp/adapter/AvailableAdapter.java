@@ -76,15 +76,8 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
             holder.tDonateDate.setText(R.string.last_donated);
         } else {
             try {
-                int donateDATE = differenceBetweenDates(date);
-
-                if (donateDATE == 1) {
-                    holder.tDonateDate.setText("Last Donated " +
-                            donateDATE + " month ago");
-                } else {
-                    holder.tDonateDate.setText("Last Donated " +
-                            donateDATE + " months ago");
-                }
+                String donateDATE = differenceBetweenDates(date);
+                holder.tDonateDate.setText("Last Donated " + donateDATE);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -137,7 +130,7 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
 
     }
 
-    private int differenceBetweenDates(String prev_date) throws ParseException {
+    private String differenceBetweenDates(String prev_date) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Date p_date = simpleDateFormat.parse(prev_date);
         Date now = new Date(System.currentTimeMillis());
@@ -145,7 +138,24 @@ public class AvailableAdapter extends RecyclerView.Adapter<AvailableAdapter.List
         //difference between dates
         long difference = Math.abs(p_date.getTime() - now.getTime());
         long differenceDates = difference / (24 * 60 * 60 * 1000);
-        return (int) differenceDates/30;
+
+        int month = (int) differenceDates/30;
+
+        if (month >= 12){
+            int year = month / 12;
+
+            if (year == 1){
+                return "" + year + " year ago";
+            } else {
+                return "" + year + " years ago";
+            }
+        } else {
+            if (month == 1){
+                return "" + month + " month ago";
+            } else {
+                return "" + month + " month ago";
+            }
+        }
     }
 
     final class ListHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

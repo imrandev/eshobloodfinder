@@ -39,7 +39,6 @@ import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
 import com.app.appathon.blooddonateapp.helper.ConnectivityReceiver;
 import com.app.appathon.blooddonateapp.helper.SimpleDividerItemDecoration;
 import com.app.appathon.blooddonateapp.interfaces.ActionCallToUser;
-import com.app.appathon.blooddonateapp.model.ProfileSecurity;
 import com.app.appathon.blooddonateapp.model.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,9 +51,9 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class AvailableDonors extends Fragment implements FirebaseDatabaseHelper.AvailableDonorInterface,
-        ConnectivityReceiver.ConnectivityReceiverListener,
-        MainActivity.FragmentCommunicator{
+public class AvailableDonors extends Fragment
+        implements FirebaseDatabaseHelper.AvailableDonorInterface, ConnectivityReceiver.ConnectivityReceiverListener,
+        MainActivity.FragmentCommunicator {
 
     private FloatingActionButton mFabButton;
     private RecyclerView recyclerView;

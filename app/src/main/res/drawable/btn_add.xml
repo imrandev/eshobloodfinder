@@ -7,6 +7,6 @@
         />
 
     <item
-        android:drawable="@drawable/ic_arrow_forward"
+        android:drawable="@drawable/ic_angle_right"
         />
 </selector>

@@ -24,6 +24,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.app.BloodApplication;
 import com.app.appathon.blooddonateapp.database.FirebaseDatabaseHelper;
@@ -74,6 +76,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private String SUBMIT_PRESSED = "OPEN";
     private FirebaseDatabaseHelper databaseHelper;
     private ProgressBar progressBar;
+    private String status;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,7 +175,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
         DetectedActivity detectedActivity = SmartLocation.with(this).activity().getLastActivity();
         if (detectedActivity != null) {
-
+            status = "" + getNameFromType(detectedActivity);
         }
     }
 
@@ -285,7 +288,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     private void setMapViewByDonors(ArrayList<User> userArrayList) {
         progressBar.setVisibility(View.VISIBLE);
-        final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
         gMap.clear();
         if (!userArrayList.isEmpty()) {
             for (int i = 0; i < userArrayList.size(); i++) {
@@ -294,86 +296,94 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
                 String userName = userArrayList.get(i).getName();
                 String date = userArrayList.get(i).getLastDonate();
 
-                MarkerOptions markerOption = new MarkerOptions();
-
-                if (date.compareTo("Never")==0){
-                    markerOption.snippet("Blood Group : " + blood
-                            + "\n"
-                            + "Last Donate : " + date
-                    );
-                } else {
-                    try {
-                        int donateDate = differenceBetweenDates(date);
-
-                        if (donateDate <= 1){
-                            markerOption.snippet("Blood Group : " + blood
-                                    + "\n"
-                                    + "Last Donate : " + donateDate
-                                    + " month ago"
-                            );
-                        } else {
-                            markerOption.snippet("Blood Group : " + blood
-                                    + "\n"
-                                    + "Last Donate : " + donateDate
-                                    + " month(s) ago"
-                            );
-                        }
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-
                 int lat = (int) userArrayList.get(i).getLat();
                 int lng = (int) userArrayList.get(i).getLng();
 
                 if (lat > 0 && lng > 0){
                     LatLng latLng = new LatLng(lat,lng);
-                    markerOption.position(latLng);
+                    addMarkerToMap(userName, uId, blood, date, latLng);
                 } else {
                     String add = userArrayList.get(i).getAddress();
                     LatLng l = getLocationFromAddress(add);
                     if (l!=null){
-                        markerOption.position(l);
+                        addMarkerToMap(userName, uId, blood, date, l);
                     }
                 }
-
-                markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-                markerOption.title(userName);
-
-                gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-                    @Override
-                    public View getInfoWindow(Marker arg0) {
-                        return null;
-                    }
-
-                    @Override
-                    public View getInfoContents(Marker marker) {
-
-                        View info = View.inflate(NearbyDonorActivity.this,R.layout.item_info_window, null);
-
-                        TextView title = (TextView) info.findViewById(R.id.mtitle);
-                        title.setText(marker.getTitle());
-
-                        TextView snippet = (TextView) info.findViewById(R.id.date);
-                        snippet.setText(marker.getSnippet());
-                        snippet.setTypeface(ThemeFont);
-
-                        TextView button = (TextView) info.findViewById(R.id.msg_thumb);
-                        button.setText(String.valueOf(marker.getTitle().charAt(0)));
-                        button.setTypeface(ThemeFont);
-
-                        return info;
-                    }
-                });
-                Marker marker = gMap.addMarker(markerOption);
-                marker.setTag(uId);
-                marker.showInfoWindow();
-
-                progressBar.setVisibility(View.INVISIBLE);
             }
         } else {
             progressBar.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void addMarkerToMap(String userName, String uId, String blood, String date, LatLng latLng){
+        MarkerOptions markerOption = new MarkerOptions();
+
+        if (date.compareTo("Never")==0){
+            markerOption.snippet("Blood Group : " + blood
+                    + "\n"
+                    + "Last Donate : " + date
+            );
+        } else {
+            try {
+                int donateDate = differenceBetweenDates(date);
+
+                if (donateDate <= 1){
+                    markerOption.snippet("Blood Group : " + blood
+                            + "\n"
+                            + "Last Donate : " + donateDate
+                            + " month ago"
+                    );
+                } else {
+                    markerOption.snippet("Blood Group : " + blood
+                            + "\n"
+                            + "Last Donate : " + donateDate
+                            + " month(s) ago"
+                    );
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        markerOption.position(latLng);
+        markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        markerOption.title(userName);
+
+        addInfoToMarker();
+
+        Marker marker = gMap.addMarker(markerOption);
+        marker.setTag(uId);
+        marker.showInfoWindow();
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void addInfoToMarker() {
+        gMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+
+                View info = View.inflate(NearbyDonorActivity.this,R.layout.item_info_window, null);
+                Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
+
+                TextView title = (TextView) info.findViewById(R.id.mtitle);
+                title.setText(marker.getTitle());
+
+                TextView snippet = (TextView) info.findViewById(R.id.date);
+                snippet.setText(marker.getSnippet());
+                snippet.setTypeface(ThemeFont);
+
+                TextView button = (TextView) info.findViewById(R.id.msg_thumb);
+                button.setText(String.valueOf(marker.getTitle().charAt(0)));
+                button.setTypeface(ThemeFont);
+
+                return info;
+            }
+        });
     }
 
     @Override
@@ -503,5 +513,22 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         long difference = Math.abs(p_date.getTime() - now.getTime());
         long differenceDates = difference / (24 * 60 * 60 * 1000);
         return (int) differenceDates/30;
+    }
+
+    private String getNameFromType(DetectedActivity activityType) {
+        switch (activityType.getType()) {
+            case DetectedActivity.IN_VEHICLE:
+                return "in_vehicle";
+            case DetectedActivity.ON_BICYCLE:
+                return "on_bicycle";
+            case DetectedActivity.ON_FOOT:
+                return "on_foot";
+            case DetectedActivity.STILL:
+                return "still";
+            case DetectedActivity.TILTING:
+                return "tilting";
+            default:
+                return "unknown";
+        }
     }
 }

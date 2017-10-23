@@ -15,8 +15,8 @@ android {
         applicationId "com.app.appathon.blooddonateapp"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 7
+        versionName "3.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [onesignal_app_id               : "8aa94ffc-12ce-4f9c-b675-f8ad72fe4520",
