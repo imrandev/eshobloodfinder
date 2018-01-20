@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +22,7 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.app.appathon.blooddonateapp.BuildConfig;
-import com.app.appathon.blooddonateapp.Config.Config;
+import com.app.appathon.blooddonateapp.config.Config;
 import com.app.appathon.blooddonateapp.R;
 import com.app.appathon.blooddonateapp.fragments.LocatingDonors;
 import com.app.appathon.blooddonateapp.model.User;
@@ -46,6 +45,9 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.onesignal.OSPermissionSubscriptionState;
 import com.onesignal.OneSignal;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 
 public class MainActivity extends AppCompatActivity
         implements ValueEventListener, SearchView.OnQueryTextListener {
@@ -59,8 +61,17 @@ public class MainActivity extends AppCompatActivity
     public int someIntValue = 1;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
         setContentView(R.layout.activity_main);
 
         FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -70,7 +81,7 @@ public class MainActivity extends AppCompatActivity
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
 
-        final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
+        //final Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/Arkhip_font.ttf");
 
         //Initializing Firebase
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -87,7 +98,7 @@ public class MainActivity extends AppCompatActivity
         //Inflating NavHeader
         View navHeader = View.inflate(this, R.layout.navbar_head, null);
         headerText = (TextView) navHeader.findViewById(R.id.user_name);
-        headerText.setTypeface(ThemeFont);
+        //headerText.setTypeface(ThemeFont);
 
         //Initializing Navigation Drawer
         Drawer result = new DrawerBuilder()
@@ -101,7 +112,6 @@ public class MainActivity extends AppCompatActivity
                                 .withIconColor(Color.GRAY)
                                 .withTextColor(Color.GRAY)
                                 .withSelectedTextColor(Color.DKGRAY)
-                                .withTypeface(ThemeFont)
                                 .withIdentifier(1),
                         new PrimaryDrawerItem()
                                 .withName("Inbox")
@@ -109,10 +119,8 @@ public class MainActivity extends AppCompatActivity
                                 .withIconColor(Color.GRAY)
                                 .withTextColor(Color.GRAY)
                                 .withSelectedTextColor(Color.DKGRAY)
-                                .withTypeface(ThemeFont)
                                 .withIdentifier(2),
                         new SectionDrawerItem().withName("More")
-                                .withTypeface(ThemeFont)
                                 .withTextColor(Color.GRAY),
                         new PrimaryDrawerItem()
                                 .withName("My Profile")
@@ -120,7 +128,6 @@ public class MainActivity extends AppCompatActivity
                                 .withIconColor(Color.GRAY)
                                 .withTextColor(Color.GRAY)
                                 .withSelectedTextColor(Color.DKGRAY)
-                                .withTypeface(ThemeFont)
                                 .withIdentifier(3),
                         new PrimaryDrawerItem()
                                 .withName("Sign Out")
@@ -128,7 +135,6 @@ public class MainActivity extends AppCompatActivity
                                 .withIconColor(Color.GRAY)
                                 .withTextColor(Color.GRAY)
                                 .withSelectedTextColor(Color.DKGRAY)
-                                .withTypeface(ThemeFont)
                                 .withIdentifier(5)
                 ) // add the items we want to use with our Drawer
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -210,8 +216,9 @@ public class MainActivity extends AppCompatActivity
                 if (snapshot.getKey().equals(firebaseUser.getUid())) {
                     String displayName = uData.getName();
                     headerText.setText(displayName);
-                    Config.CURRENT_USERNAME = uData.getName();
-                    Config.CURRENT_USER_PHONE = uData.getPhone();
+                    Config config = new Config();
+                    config.setName(uData.getName());
+                    config.setPhone(uData.getPhone());
                 }
             }
         }

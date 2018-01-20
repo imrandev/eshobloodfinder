@@ -1,5 +1,6 @@
 package com.app.appathon.blooddonateapp.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -37,6 +38,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class SignInActivity extends AppCompatActivity implements View.OnClickListener{
 
     private EditText etPhone, etPwd;
@@ -52,18 +56,21 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     private InterstitialAdsHelper interAds;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
         setContentView(R.layout.activity_sign_in);
-
-        Typeface ThemeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
-        TextView signMe = (TextView) findViewById(R.id.sin_me);
-        TextView phnAuth = (TextView) findViewById(R.id.phn_auth);
-        phnAuth.setTypeface(ThemeFont);
-        signMe.setTypeface(ThemeFont);
 
         progressBar = (ProgressBar) findViewById(R.id.marker_progress);
 

@@ -1,6 +1,7 @@
 package com.app.appathon.blooddonateapp.activities;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -38,6 +39,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener,
         ValueEventListener, FirebaseDatabaseHelper.RequestToUser {
 
@@ -51,20 +55,25 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private TextView ago;
 
     private static final int REQUEST_PHONE_CALL = 1;
-    private String user_donate;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
         setContentView(R.layout.activity_user_profile);
 
         // Handle Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-
-        //Custom font
-        Typeface Helvetica = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue.ttf");
 
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -86,13 +95,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         buttonCall = (FloatingActionButton) findViewById(R.id.call_btn);
         snackView = findViewById(R.id.user_profile);
         ago = (TextView) findViewById(R.id.ago);
-
-        bloodView.setTypeface(Helvetica);
-        nameView.setTypeface(Helvetica);
-        addressView.setTypeface(Helvetica);
-        donateView.setTypeface(Helvetica);
-        genderView.setTypeface(Helvetica);
-        phoneView.setTypeface(Helvetica);
 
         mDatabase.child("users").addValueEventListener(this);
         buttonCall.setOnClickListener(this);
@@ -202,7 +204,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         ago.setText("");
                         donateView.setText(dDate);
                     } else {
-                        user_donate = differenceBetweenDates(user.getLastDonate());
+                        String user_donate = differenceBetweenDates(user.getLastDonate());
                         donateView.setText(user_donate.split("\\s")[0]);
                         ago.setText("" + user_donate.split("\\s")[1] + " " + user_donate.split("\\s")[2]);
                     }

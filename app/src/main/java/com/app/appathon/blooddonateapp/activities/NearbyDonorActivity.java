@@ -2,6 +2,7 @@ package com.app.appathon.blooddonateapp.activities;
 
 import android.Manifest;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -58,7 +59,11 @@ import io.nlopez.smartlocation.OnGeofencingTransitionListener;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.geofencing.utils.TransitionGeofence;
+import io.nlopez.smartlocation.location.config.LocationAccuracy;
+import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesProvider;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class NearbyDonorActivity extends AppCompatActivity implements OnMapReadyCallback,
         ConnectivityReceiver.ConnectivityReceiverListener, ConnectivityReceiver.GpsStatusReceiverListener,
@@ -79,8 +84,17 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
     private String status;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
         setContentView(R.layout.activity_nearby_donor);
 
         //Initializing Firebase Database Reference
@@ -160,10 +174,19 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     private void startLocation() {
 
+        long mLocTrackingInterval = 1000 * 5; // 5 sec
+        float trackingDistance = 0;
+        LocationAccuracy trackingAccuracy = LocationAccuracy.HIGH;
+
+        LocationParams.Builder builder = new LocationParams.Builder()
+                .setAccuracy(trackingAccuracy)
+                .setDistance(trackingDistance)
+                .setInterval(mLocTrackingInterval);
+
         provider = new LocationGooglePlayServicesProvider();
         provider.setCheckLocationSettings(true);
         SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
-        smartLocation.location(provider).start(this);
+        smartLocation.location(provider).continuous().config(builder.build()).start(this);
         smartLocation.activity().start(this);
     }
 
@@ -203,7 +226,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
         try {
             address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
+            if (address == null || address.size()==0) {
                 return null;
             }
             Address location = address.get(0);
@@ -325,21 +348,12 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
             );
         } else {
             try {
-                int donateDate = differenceBetweenDates(date);
+                String donateDate = differenceBetweenDates(date);
 
-                if (donateDate <= 1){
-                    markerOption.snippet("Blood Group : " + blood
-                            + "\n"
-                            + "Last Donate : " + donateDate
-                            + " month ago"
-                    );
-                } else {
-                    markerOption.snippet("Blood Group : " + blood
-                            + "\n"
-                            + "Last Donate : " + donateDate
-                            + " month(s) ago"
-                    );
-                }
+                markerOption.snippet("Blood Group : " + blood
+                        + "\n"
+                        + "Last Donate : " + donateDate
+                );
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -421,7 +435,6 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
 
     private void showLocation(Location location) {
         if (location != null) {
-            getMapData(gMap, new LatLng(location.getLatitude(), location.getLongitude()));
             DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
             mDatabase.child("users").child(userId).child("lat").setValue(location.getLatitude());
             mDatabase.child("users").child(userId).child("lng").setValue(location.getLongitude());
@@ -504,7 +517,7 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    private int differenceBetweenDates(String prev_date) throws ParseException {
+    private String differenceBetweenDates(String prev_date) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Date p_date = simpleDateFormat.parse(prev_date);
         Date now = new Date(System.currentTimeMillis());
@@ -512,7 +525,24 @@ public class NearbyDonorActivity extends AppCompatActivity implements OnMapReady
         //difference between dates
         long difference = Math.abs(p_date.getTime() - now.getTime());
         long differenceDates = difference / (24 * 60 * 60 * 1000);
-        return (int) differenceDates/30;
+
+        int month = (int) differenceDates/30;
+
+        if (month >= 12){
+            int year = month / 12;
+
+            if (year == 1){
+                return "" + year + " year ago";
+            } else {
+                return "" + year + " years ago";
+            }
+        } else {
+            if (month == 1){
+                return "" + month + " month ago";
+            } else {
+                return "" + month + " month ago";
+            }
+        }
     }
 
     private String getNameFromType(DetectedActivity activityType) {

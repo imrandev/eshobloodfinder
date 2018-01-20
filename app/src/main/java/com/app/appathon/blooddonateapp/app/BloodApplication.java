@@ -2,6 +2,7 @@ package com.app.appathon.blooddonateapp.app;
 
 import android.app.Application;
 import android.content.Intent;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.app.appathon.blooddonateapp.R;
@@ -20,7 +21,7 @@ import org.json.JSONObject;
  * Created by TAOHID on 6/29/2017.
  */
 
-public class BloodApplication extends Application {
+public class BloodApplication extends MultiDexApplication {
     private static BloodApplication mInstance;
 
     @Override
