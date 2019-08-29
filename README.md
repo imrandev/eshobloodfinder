@@ -1,8 +1,6 @@
 # Esho Blood Finder
 An android application to find blood donor one's nearby area easily using Google Map
 
-<a href="https://play.google.com/store/apps/details?id=com.app.appathon.blooddonateapp">Available on Google Play Store</a>
-
 Esho Blood Finder is a blood donor finding app which will helps users to find nearby donors. 
 Esho Blood Finder is a blood donor finding app which will helps users to find nearby donors. 
 This app works to create a bond between blood giver and receiver. 
